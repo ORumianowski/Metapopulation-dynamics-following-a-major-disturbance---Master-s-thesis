@@ -1,0 +1,102 @@
+Rumianowski Odin
+
+Objectifs / Résumé / Notes / Questions
+
+## 08/01/2024 - lundi
+
+# Résumé
+Lecture de la thèse Perron p7-19
+
+# Notes
+Thèse Perron:
+
+p7
+Notion de dynamique de population / matrice de Leslie
+
+p8
+Traits d'histoire de vie
+e.g. compromis entre 
+reproduction et survie
+âge à la première reproduction et croissance somatique
+
+p9
+Le taux de dispersion est un autre trait d’histoire de vie 
+
+dynamique sources/puits :
+Pulliam, 1988, métapopulations : Gilpin & Hanski, 1991
+
+D’un point de vue évolutionniste, la dispersion est vue comme une réponse à trois 
+facteurs (Gandon & Michakalis, 2001) : (i) les variations spatio-temporelles de la qualité de 
+l’habitat, (ii) le risque de consanguinité, et (iii) la compétition intra-spécifique
+
+p10
+la probabilité de dispersion est plus élevée chez un des sexes (les 
+femelles chez la majorité des oiseaux ; Greenwood, 1980),
+
+p11
+Outarde barbue du portugal - les individus montrent un fort taux de fidélité au site, par le triple effet de:
+leur expérience personnelle des autres sites, de l’attraction sociale, et de la qualité de l’habitat elle-même.
+
+p12
+un coût de la dispersion lié à la familiarité avec l’environnement
+
+Les oiseaux coloniaux influencées les échanges d’information entre individus et l’apparentement avec leurs voisins sur la colonie 
+
+coûts induits par la nidification en forte densité : transmission de maladies, compétition intra-spécifique, agressivité
+
+bénéfices:
+(i) réduction du risque de prédation et (ii) facilitation de la recherche alimentaire (par exemple par le biais d’échange 
+d’information sur la localisation des ressources
+
+p13-14
+
+chap 1
+les jeunes oiseaux ont intérêt, pour pouvoir se 
+reproduire le plus tôt possible, à s’installer sur des petites colonies, moins productives, et à 
+retourner sur la grande colonie du système, plus productive, une fois une certaine expérience 
+acquise
+
+chap 2
+la dispersion de reproduction des adultes est assez limitée
+
+une tendance marquée à retourner sur le 
+site de naissance après un premier évènement de dispersion
+
+l’attraction pour les plus grandes colonies:
+soit que les grandes colonies sont situées sur un meilleur habitat
+soit que la taille de colonie fournit des bénéfices qui sont supérieurs aux coûts
+
+# mon stage pourrait évaluer cette dernière hypothèse
+
+p15
+Explication des théories de la sénescence
+
+p16
+Chez les mouettes il existe bien une telle variation interannuelle sous la forme 
+des à-secs d’étangs qui favoriseraient temporairement les dispersants
+
+p17
+heterogenéités & CMR
+
+SECTION 1 - La dispersion
+CHAPITRE 1 - Modélisation intégrée
+
+p27
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

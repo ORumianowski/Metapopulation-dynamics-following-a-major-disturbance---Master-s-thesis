@@ -1,0 +1,20 @@
+### LU
+
+
+
+### A LIRE
+## Mouette rieuse
+
+
+## Colonialité
+
+quatre thèses: Perron / Francesiaz /  /  
+
+## Modele & Implementation
+
+Bayesien : deux livres
+
+Lebreton, Jean-Dominique, Kenneth P. Burnham, Jean Clobert, et David R. Anderson. « Modeling Survival and Testing Biological Hypotheses Using Marked Animals: A Unified Approach with Case Studies ». Ecological Monographs 62, nᵒ 1 (mars 1992): 67‑118. https://doi.org/10.2307/2937171.
+
+Lebreton, Jean‐Dominique, James D. Nichols, Richard J. Barker, Roger Pradel, et Jeffrey A. Spendelow. « Chapter 3 Modeling Individual Animal Histories with Multistate Capture–Recapture Models ». In Advances in Ecological Research, 41:87‑173. Elsevier, 2009. https://doi.org/10.1016/S0065-2504(09)00403-6.
+
