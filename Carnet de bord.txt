@@ -81,16 +81,93 @@ heterogenéités & CMR
 SECTION 1 - La dispersion
 CHAPITRE 1 - Modélisation intégrée
 
-p27
+## 09/01/2024 - mardi
+# Notes
+
+p27-32
+
+Les jeunes dispersent vers des colonies de faible qualité car ils peuvent y recruter plus tôt
+
+Les échanges d’individus adultes  apparaissent comme un déterminant important des variations de taille de colonie.
+
+Practical implementations of this AE model often use the recoveries of dead individuals to estimate the rate of transition from the study sites to the state AE. 
+In the absence of dead recovery data, deterministic temporary emigration models are needed.
+
+the likelihoods of both a CMR multistate model – using CMR softwares (e.g., E-SURGE; Choquet et al., 2009) and a state-space population model – using a Kalman filter (Harvey 1989)
+
+counting the number of individuals flying over the colonies after having provoked a general alarm that puts all the gulls into flight
+
+
+he number of adults Nad was converted to an estimated number of pairs Np based on Np = 0.7 Nad (Grosbois 2001, unpublished results)
+
+
+This model was based on additional data (the ratio of ringed/non- ringed birds and the probability of reading the ring of a bird when detected), and on detection probabilities estimated from a CMR model (Grosbois 2001). This non-independence between CMR and survey data is considered negligible.
+
+
+p34
+
+First, the GOF of the “JMV multisite model” (Pradel et al., 2005) was tested using U-CARE (Choquet et al., 2005).
+
+p35-36
+
+The state-space population model is based on a state equation and an observation equation. By imposing a Gaussian assumption, calculating the maximum likelihood estimates of model parameters through a Kalman filter is possible.
+
+""
+Partially time-dependent site-fidelity and settlement probabilities. The timedependence was reduced to the minimum needed to model the disappearance and 
+reappearance of some colonies. As long as there was no change in the presence/absence of the 
+study colonies, the site-fidelity and settlement probabilities remained constant. 
+"" # Grosse contrainte sur les paramètres.
+# On considère que c'est la même dynamique de dispersion pendant toutes la phase d'étude
+
+# Why NORMAL assumption and not LOG-NORMAL ?
+
+xt = At Θ ⋅ xt −1 + ε
+At  was the Leslie matrix
+
+yt = H t xt + η
+Ht was the observation matrix l
+
+We considered that the error on the colony counts was proportional to the observed colony size
+
+in small colonies and LR, we used two distinct parameters, 2 LR σ and 2 SC
+
+
+p39
+
+des contraintes pour la convergence, vers le maximum absolu
+
+p40-45
+
+presentation des réultats du modèle
+
+Accession to reproduction was significantly quicker in small colonies than in LR
+
+p46
+discussion
+
+qualité de LR - dans quel mesure LR possède intrasèquement un meilleur habitat. Est-ce que les ad. choisissent pour la taille pour pour l'habitat
 
 
 
+CHAPITRE 2 - DISPERSION DE REPRODUCTION
+
+La distance entre les colonies est apparue comme un bon prédicteur des taux 
+d’échanges entre colonies. De plus, les oiseaux qui ont recruté hors de leur colonie de 
+naissance (dispersants de naissance) tendent à y revenir plus tard dans leur vie 
+(mémoire à long terme).
 
 
+p60
+the rate of exchange between 
+colonies should decrease with distance (Citta & Lindbergh, 2007), in order to minimise the 
+loss of familiarity with the breeding environment
 
 
-
-
+p61
+Such a “breed-while-queuing” strategy 
+would enable individual to combine the advantages of (i) reproducing as early as possible 
+(Newton, 1989), even if it is with a (slightly) lower breeding success than in the preferred site 
+and (ii) breeding in a familiar place after the second dispersal event
 
 
 
