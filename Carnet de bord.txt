@@ -218,6 +218,13 @@ decisions.
 # Chapitre 3 : SUCCES REPRODUCTEUR ET TAILLE DE 
 COLONIE
 
+En couplant les prédictions du modèle de taille de 
+famille et de probabilité d’échec de la colonie, nous obtenons un modèle indiquant un coût à 
+nicher sur des colonies de moins de 500 couples, et un effet relativement neutre de la taille de 
+colonie au-delà de cette taille.
+
+# chercher quand cela a été montré
+
 
 
 
