@@ -169,10 +169,54 @@ would enable individual to combine the advantages of (i) reproducing as early as
 (Newton, 1989), even if it is with a (slightly) lower breeding success than in the preferred site 
 and (ii) breeding in a familiar place after the second dispersal event
 
+p64
+We also ringed birds in other colonies that were not subsequently 
+surveyed and were ring-reading did not take place. On the whole these colonies averaged 
+2306 pairs over the study period and they constituted a fifth compartment of our multisite 
+population (see next section). 
+
+p66
+CMR models with individual heterogeneity in dispersal 
+
+Multievent models allow a 
+discrete, hidden individual heterogeneity structure on the parameters of a multisite CMR 
+model (Pradel, 2009)
+
+The point of this mixture model is to separate histories like “10110001”, representing site-faithful individuals, from 
+histories like “40130002”, representing non site-faithful individuals.
+
+Each individual has a probability π that they are in the low-emigration (stayer) path, and 1-π that 
+they are in the high-emigration (mover) path
+
+p67 to p69 skipped - same method
 
 
+settlement prob increses with distance proximity and number of pairs
 
 
+p75-79
+DISCUSSION
+
+the tendency to disperse was maintained 
+from the natal dispersal choice onwards
+
+The attraction for larger colonies could stem from direct benefits of colony size (Brown & 
+Bomberger Brown, 1996) or indicate that large colonies are situated in high-quality habitats 
+(discussed in Forbes & Kaiser, 1994)
+
+Whether this effect would have been maintained if 
+removing the largest LR colony from the system remains unknown.
+
+## aller voir ces papiers
+
+Indeed, our study shows that experienced breeders give 
+preference to familiar places when dispersing. This result implies that, contrary to the 
+assumption of the ideal free distribution theory, information is not freely available and that 
+individuals rely on their personal experience of potential breeding sites to make habitat choice 
+decisions.
+
+# Chapitre 3 : SUCCES REPRODUCTEUR ET TAILLE DE 
+COLONIE
 
 
 
