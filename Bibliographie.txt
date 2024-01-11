@@ -1,7 +1,3 @@
- ### LU
-
-
-
 ### A LIRE
 ## Mouette rieuse
 
@@ -11,6 +7,9 @@
 quatre thèses: Perron / Francesiaz /  /  
 
 ## Modele & Implementation
+
+
+chap 7 et 11 de kery 2011
 
 Bayesien : deux livres
 

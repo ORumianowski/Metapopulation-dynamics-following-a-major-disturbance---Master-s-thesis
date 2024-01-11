@@ -17,23 +17,11 @@ Lecture du chap 1 et 2 + résumé du 3 de Perron thèse
 
 Arrivé au CEFE + lecture de Lebreton 1992 (jusqu'à model selection tools)
 
+
 ## 11/01/2024 - jeudi
 
 Lecture de Kéry 2022:
 
-BAYESIAN COMPUTATION
-
-BUGS SOFTWARE: WinBUGS, OpenBUGS, JAGS, AND NIMBLE
-
-2.7 USING JAGS TO FIT SIMPLE STATISTICAL MODELS FROM R: GENERALIZED LINEAR
-AND GENERALIZED LINEAR MIXED MODELS
-
-2.7.1 POISSON GENERALIZED LINEAR MODELS
-
-
-objectif:
-
-début de 2022
-+ chap 7 et 11 de kery 2012
+BAYESIAN COMPUTATION to MULTINOMIAL 
 
 
