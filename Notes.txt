@@ -225,6 +225,71 @@ colonie au-delà de cette taille.
 
 # chercher quand cela a été montré
 
+## 11/01/2024 - jeudi
+
+Lecture de Kéry 2022
+
+BAYESIAN COMPUTATION
+
+The number of iterations required for the chain to reach a stationary distribution depends on the type of MCMC algorithm, the tuning parameter sproposal , the complexity of the model, and the size of the data set.
+
+To emphasize this, there is a plot of the autocorrelation function (ACF) in the bottom right. It shows that in our example, the autocorrelation dies down after about 10 steps
+
+Tuning some “knobs” of an MCMC algorithm is something that MCMC software such as JAGS does automatically at the
+beginning of every analysis in the so-called adaptive phase.
+
+
+2.6 BUGS SOFTWARE: WinBUGS, OpenBUGS, JAGS, AND NIMBLE
+
+2.7 USING JAGS TO FIT SIMPLE STATISTICAL MODELS FROM R: GENERALIZED LINEAR
+AND GENERALIZED LINEAR MIXED MODELS
+
+2.7.1 POISSON GENERALIZED LINEAR MODELS
+
+It may
+then be useful to use the simpler jags.basic function that just returns to R the posterior random numbers produced by
+JAGS. In addition, jagsUI has a useful autojags function that automatically runs an analysis until convergence is reached.
+
+
+However, in more complex models, it is often absolutely critical to provide initial values that are somewhat “close” to the solution or at least that do not contradict the model and the data.
+
+For any model that takes longer than just a couple of minutes, it is highly recommended to set parallel=TRUE.
+
+
+Finally, you may sometimes look for the time it took to run a model; this is in mcmc.info$elapsed.mins.
+
+Hence, an Rhat value of one indicates convergence, and a common rule of
+thumb is to take 1.1 as a critical threshold for assuming convergence
+
+
+Both are fine for use in model
+selection with simple GLMs such as this one but should not be relied upon in most hierarchical models (Celeux et al., 2006;
+Hooten and Hobbs, 2015)
+
+Done -p39
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
