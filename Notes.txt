@@ -249,7 +249,7 @@ AND GENERALIZED LINEAR MIXED MODELS
 It may
 then be useful to use the simpler jags.basic function that just returns to R the posterior random numbers produced by
 JAGS. In addition, jagsUI has a useful autojags function that automatically runs an analysis until convergence is reached.
-
+!!!
 
 However, in more complex models, it is often absolutely critical to provide initial values that are somewhat “close” to the solution or at least that do not contradict the model and the data.
 
@@ -266,19 +266,20 @@ Both are fine for use in model
 selection with simple GLMs such as this one but should not be relied upon in most hierarchical models (Celeux et al., 2006;
 Hooten and Hobbs, 2015)
 
-Done -p39
+2.7.2 BERNOULLI GENERALIZED LINEAR MODELS
 
+Prepare covariate for prediction
 
+2.7.3 BINOMIAL GENERALIZED LINEAR MODELS
 
+2.7.4 MULTINOMIAL GENERALIZED LINEAR MODELS
 
+There are several possible solutions to this; see Sections 9.6 and 9.7 in Ke´ry and Schaub (2012). Here, we adopt a Dirichlet distribution,
+which we construct from a normalized set of gamma variables (Royle and Dorazio, 2008) 
 
+## Dirichlet distribution ?
 
-
-
-
-
-
-
+Next, we show a really cool variant of a multinomial GLM, which will be exactly the CJS model fit to the m-array format of capture-recapture data in Section 4.5.1.2.
 
 
 
