@@ -281,6 +281,56 @@ which we construct from a normalized set of gamma variables (Royle and Dorazio, 
 
 Next, we show a really cool variant of a multinomial GLM, which will be exactly the CJS model fit to the m-array format of capture-recapture data in Section 4.5.1.2.
 
+## 11/01/2024 - vendredi
+
+Lecture de Kéry 2012: chap 7
+
+
+CHAPITRE 7 : Estimation of Survival from
+Capture–Recapture Data Using
+the Cormack–Jolly–Seber Model
+
+p171
+The CJS model can be fitted using either a multinomial (Lebreton et al.,
+1992) or a state-space likelihood (Gimenez et al., 2007; Royle, 2008).
+
+The basic model assumes that each individual within an age class or group has the same survival and recapture probability. Goodness-of-fit tests help to identify severe violation of these assumptions (e.g., trap-response: Pradel, 1993; transients: Pradel et al., 1997)
+
+Mortality and permanent emigration are confounded, and therefore apparent survival is always lower than true survival whenever permanent emigration is
+not zero.
+
+p175
+
+The following two equations define the
+state process:
+	zi,fi = 1
+zi,t+1 sachant zi,t ~ Bernoulli(zi,ϕi,t)
+
+The following equation defines
+the observation process:
+yi,t sachant zi,t ~ Bernoulli(zi,pi,t)
+
+p181
+
+To improve computation speed and convergence, we can add what we
+know about the latent state z, namely, whenever we observe a marked
+individual we know its latent state is z = 1.
+
+Therefore, we recommend providing all available
+information about the latent state in the data.
+
+
+Time effects with fixed effect and random effect
+
+7.4.3 Temporal Covariates
+
+
+## 15/01/2024 - lundi
+
+7.7 MODELS WITH AGE EFFECTS
+
+## Arret pour installer et apprendre nimble
+
 
 
 
