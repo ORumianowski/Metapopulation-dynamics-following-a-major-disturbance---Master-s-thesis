@@ -340,8 +340,13 @@ The most direct approach to invoking the MCMC engine is using the nimbleMCMC fun
 
 However, this approach is restricted to using NIMBLE’s default MCMC algorithm; further customization of, for example, the specific samplers employed, is not possible.
 
+7.10 FITTING THE CJS TO DATA IN THE M-ARRAY
+FORMAT: THE MULTINOMIAL LIKELIHOOD
 
 
+This has the advantage of much faster computation, but
+the disadvantage of reduced flexibility in the modeling. In particular,
+models with individual effects can no longer be fitted
 
 
 
