@@ -331,8 +331,14 @@ Time effects with fixed effect and random effect
 
 ## Arret pour installer et apprendre nimble
 
+https://r-nimble.org/html_manual/cha-mcmc.html#sec:initMCMC
 
+Chapter 7 MCMC
+NIMBLE provides a variety of paths to creating and executing an MCMC algorithm, which differ greatly in their simplicity of use, and also in the options available and customizability.
 
+The most direct approach to invoking the MCMC engine is using the nimbleMCMC function (Section 7.1)
+
+However, this approach is restricted to using NIMBLE’s default MCMC algorithm; further customization of, for example, the specific samplers employed, is not possible.
 
 
 

@@ -29,15 +29,13 @@ BAYESIAN COMPUTATION to MULTINOMIAL
 Lecture de Kéry 2012: chap 7 - modele de survie
 jusqu'à la page 203
 
-##################################################################################
+### Semaine 2
 
 ## 15/01/2024 - lundi
 
 Objectifs:
-- isoler les paramètres nécessaires spécifiques à notre dataset pour la première simulation simple
 - script de simulation
 - script CJS - deux classes d'âge
-
 - optimiser le code dont (si state-space) renseigner les variables latentes évidentes -> déja fait dans le code
 
 - apprendre Nimble
@@ -48,3 +46,11 @@ Résumé:
 - Lecture de One-line invocation of MCMC: nimbleMCMC
 
 - run la simulation et le modele CJS en deux classe d'age avec nimble
+
+
+## 16/01/2024 - mardi
+
+Objectifs:
+- isoler les paramètres nécessaires spécifiques à notre dataset pour la première simulation simple
+- model ave m-array foramt
+
