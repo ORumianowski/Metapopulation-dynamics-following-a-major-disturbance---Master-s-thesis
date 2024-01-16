@@ -9,7 +9,6 @@ total.marked.j <- 55000 # 55000   # Total number of marked juveniles
 
 n.occasions <-  (2023 - 1986) # Number of capture occasions  # p32 thèse Perron
 marked.j <- rep( trunc(total.marked.j / n.occasions), n.occasions-1) # Annual number of newly marked juveniles
-marked.a <- rep(0, n.occasions-1) # Annual number of newly marked adults
 phi.juv <- 0.243  # Juvenile annual survival # p42 thèse Perron
 phi.ad <- 0.844 # Adult annual survival # p42 thèse Perron
 p <- rep(0.2, n.occasions-1) # Recapture # p137 Perron

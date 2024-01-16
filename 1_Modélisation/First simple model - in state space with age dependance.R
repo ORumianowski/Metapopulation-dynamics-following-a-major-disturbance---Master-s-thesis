@@ -1,6 +1,24 @@
 
-# Define function to simulate a capture-history (CH) matrix
+library(nimble)
 
+# Simulated Dataset  ------------------------------------------------------
+
+# Dataset properties : define parameter values
+
+total.marked.j <- 550 # 55000   # Total number of marked juveniles
+
+n.occasions <-  (2023 - 1986) # Number of capture occasions  # p32 thèse Perron
+marked.j <- rep( trunc(total.marked.j / n.occasions), n.occasions-1) # Annual number of newly marked juveniles
+phi.juv <- 0.243  # Juvenile annual survival # p42 thèse Perron
+phi.ad <- 0.844 # Adult annual survival # p42 thèse Perron
+p <- rep(0.2, n.occasions-1) # Recapture # p137 Perron
+
+#The estimated detection probabilities (averaged overtime) were 0.08 (0.05; 0.10) and 0.48 (0.41; 0.55) in the low- and high-detectability classes. 
+
+phi.j <- c(phi.juv, rep(phi.ad,n.occasions-2))
+
+
+# Define function to simulate a capture-history (CH) matrix
 simul.cjs <- function(PHI, P, marked){
   n.occasions <- dim(PHI)[2] + 1
   CH <- matrix(0, ncol = n.occasions, nrow = sum(marked))
@@ -25,71 +43,41 @@ simul.cjs <- function(PHI, P, marked){
   return(CH)
 }
 
-
-# 7.7 MODELS WITH AGE EFFECTS
-
-
-# Define parameter values
-n.occasions <- 10 # Number of capture occasions
-marked.j <- rep(200, n.occasions-1) # Annual number of newly marked juveniles
-marked.a <- rep(30, n.occasions-1) # Annual number of newly marked adults
-phi.juv <- 0.3 # Juvenile annual survival
-phi.ad <- 0.65 # Adult annual survival
-p <- rep(0.5, n.occasions-1) # Recapture
-phi.j <- c(phi.juv, rep(phi.ad, n.occasions-2))
-phi.a <- rep(phi.ad, n.occasions-1)
-
-
-#Define matrices with survival and recapture probabilities
-
+# Define matrices with survival and recapture probabilities
 PHI.J <- matrix(0, ncol = n.occasions-1, nrow = sum(marked.j))
-
-for (i in 1:length(marked.j)){  # length(marked.j) correspond au nombre d'occasions de recaptures 
-  
-  PHI.J[(sum(marked.j[1:i])-marked.j[i]+1):sum(marked.j[1:i]),  i:(n.occasions-1)] <-
-    matrix(rep(phi.j[1:(n.occasions-i)],marked.j[i]), ncol = n.occasions-i, byrow = TRUE)
+for (i in 1:(length(marked.j)-1)){
+  PHI.J[(sum(marked.j[1:i])-
+           marked.j[i]+1):sum(marked.j[1:i]),i:(n.occasions-1)] <-
+    matrix(rep(phi.j[1:(n.occasions-i)], marked.j[i]),
+           ncol = n.occasions-i, byrow = TRUE)
 }
-
-P.J <- matrix(rep(p, sum(marked.j)), ncol = n.occasions-1,
-              nrow = sum(marked.j), byrow = TRUE)
-
-PHI.A <- matrix(rep(phi.a, sum(marked.a)), ncol = n.occasions-1,
-                nrow = sum(marked.a), byrow = TRUE)
-P.A <- matrix(rep(p, sum(marked.a)), ncol = n.occasions-1,
-              nrow = sum(marked.a), byrow = TRUE)
-
+P.J <- matrix(rep(p, sum(marked.j)), ncol =
+                n.occasions-1, nrow = sum(marked.j), byrow = TRUE) 
 
 # Apply simulation function
 CH.J <- simul.cjs(PHI.J, P.J, marked.j)
-CH.A <- simul.cjs(PHI.A, P.A, marked.a)
 
 
 
 # Create vector with occasion of marking   
 get.first <- function(x) min(which(x!=0))
 f.j <- apply(CH.J, 1, get.first)
-f.a <- apply(CH.A, 1, get.first)
 
 
 # Create matrices X indicating age classes
 x.j <- matrix(NA, ncol = dim(CH.J)[2]-1, nrow = dim(CH.J)[1])
-x.a <- matrix(NA, ncol = dim(CH.A)[2]-1, nrow = dim(CH.A)[1])
 for (i in 1:dim(CH.J)[1]){
   for (t in f.j[i]:(dim(CH.J)[2]-1)){
     x.j[i,t] <- 2
     x.j[i,f.j[i]] <- 1 # on ne pourrait pas placer cette ligne à l'exrt. de la boucle t ?!!
   } #t
 } #i
-for (i in 1:dim(CH.A)[1]){
-  for (t in f.a[i]:(dim(CH.A)[2]-1)){
-    x.a[i,t] <- 2
-  } #t
-} #i
+
 
 # We combine the two data sets into a common set.
-CH <- rbind(CH.J, CH.A)
-f <- c(f.j, f.a)
-x <- rbind(x.j, x.a)
+CH <- rbind(CH.J)
+f <- c(f.j)
+x <- rbind(x.j)
 
 
 # Function to create a matrix with information about known latent state z
@@ -105,41 +93,8 @@ known.state.cjs <- function(ch){
   return(state)
 }
 
-# Bundle data
-bugs.data <- list(y = CH, f = f, nind = dim(CH)[1], n.occasions = dim(CH)[2], z = known.state.cjs(CH), x = x)
 
-
-
-# Function to create a matrix of initial values for latent state z
-# Je ne comprends pa l'opération suivante (p182 du kery 2012):
-cjs.init.z <- function(ch,f){
-  for (i in 1:dim(ch)[1]){
-    if (sum(ch[i,])==1) next
-    n2 <- max(which(ch[i,]==1))
-    ch[i,f[i]:n2] <- NA
-  }
-  for (i in 1:dim(ch)[1]){
-    ch[i,1:f[i]] <- NA
-  }
-  return(ch)
-}
-
-# Initial values
-inits <- function(){list(z = cjs.init.z(CH, f), beta = runif(2, 0, 1),
-                         mean.p = runif(1, 0, 1))}
-
-# Parameters monitored
-parameters <- c("beta", "mean.p")
-
-# MCMC settings
-ni <- 2000
-nt <- 3
-nb <- 1000
-nc <- 3
-
-
-
-library(nimble)
+# Model and computational parameters --------------------------------------
 
 CJSCode = nimbleCode(code ={
   
@@ -172,6 +127,33 @@ CJSCode = nimbleCode(code ={
 }
 )
 
+# Function to create a matrix of initial values for latent state z
+# Je ne comprends pa l'opération suivante (p182 du kery 2012):
+cjs.init.z <- function(ch,f){
+  for (i in 1:dim(ch)[1]){
+    if (sum(ch[i,])==1) next
+    n2 <- max(which(ch[i,]==1))
+    ch[i,f[i]:n2] <- NA
+  }
+  for (i in 1:dim(ch)[1]){
+    ch[i,1:f[i]] <- NA
+  }
+  return(ch)
+}
+
+# Initial values
+inits <- function(){list(z = cjs.init.z(CH, f), beta = runif(2, 0, 1),
+                         mean.p = runif(1, 0, 1))}
+
+# Parameters monitored
+parameters <- c("beta", "mean.p")
+
+# MCMC settings
+ni <- 600
+nt <- 2
+nb <- 100
+nc <- 2
+
 CJSConsts <- list(f = f, nind = dim(CH)[1], n.occasions = dim(CH)[2], z = known.state.cjs(CH), x = x)
 
 CJSData <- list(y = CH)
@@ -179,13 +161,36 @@ CJSData <- list(y = CH)
 CJSInits = inits()
 
 # -------------------------------------------------------------------------
-# Version compact
-
+start_time <- proc.time()
 mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
                        data = CJSData, inits = CJSInits,
                        monitors = parameters,
-                       niter = 600,   #10000, # 5-10 min
-                       nchains = 2, nburnin = 100, thin = 2,
+                       niter = ni, nchains = nc, nburnin = nb, thin = nt,
                        summary = TRUE, WAIC = TRUE)
+end_time <- proc.time()
+
+elapsed_time <- end_time - start_time
+print(elapsed_time)
 
 mcmc.out$summary
+
+# Plot --------------------------------------------------------------------
+
+samples = rbind(mcmc.out$samples$chain1,
+                mcmc.out$samples$chain2)
+
+par(mfrow = c(1, 3), las = 1)
+
+hist(samples[,3], nclass = 30, col = "gray", main = "",
+     xlab = "mean.p", ylab = "Frequency")
+abline(v = p, col = "red", lwd = 2)
+
+hist(samples[,1], nclass = 30, col = "gray", main = "",
+     xlab = "mean.phijuv", ylab = "Frequency")
+abline(v = phi.juv, col = "red", lwd = 2)
+
+hist(samples[,2], nclass = 30, col = "gray", main = "",
+     xlab = "mean.phiad", ylab = "Frequency")
+abline(v = phi.ad, col = "red", lwd = 2)
+
+
