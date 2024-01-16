@@ -9,7 +9,7 @@ total.marked.j <- 55000 # 55000   # Total number of marked juveniles
 
 n.occasions <-  (2023 - 1986) # Number of capture occasions  # p32 thèse Perron
 marked.j <- rep( trunc(total.marked.j / n.occasions), n.occasions-1) # Annual number of newly marked juveniles
-marked.a <- rep(1, n.occasions-1) # Annual number of newly marked adults
+marked.a <- rep(0, n.occasions-1) # Annual number of newly marked adults
 phi.juv <- 0.243  # Juvenile annual survival # p42 thèse Perron
 phi.ad <- 0.844 # Adult annual survival # p42 thèse Perron
 p <- rep(0.2, n.occasions-1) # Recapture # p137 Perron
@@ -17,7 +17,6 @@ p <- rep(0.2, n.occasions-1) # Recapture # p137 Perron
 #The estimated detection probabilities (averaged overtime) were 0.08 (0.05; 0.10) and 0.48 (0.41; 0.55) in the low- and high-detectability classes. 
 
 phi.j <- c(phi.juv, rep(phi.ad,n.occasions-2))
-phi.a <- rep(phi.ad, n.occasions-1)
 
 
 # Define function to simulate a capture-history (CH) matrix
@@ -55,14 +54,9 @@ for (i in 1:(length(marked.j)-1)){
 }
 P.J <- matrix(rep(p, sum(marked.j)), ncol =
                 n.occasions-1, nrow = sum(marked.j), byrow = TRUE) 
-PHI.A <- matrix(rep(phi.a, sum(marked.a)), ncol = n.occasions-1,
-                nrow = sum(marked.a), byrow = TRUE)
-P.A <- matrix(rep(p, sum(marked.a)), ncol = n.occasions-1,
-              nrow = sum(marked.a), byrow = TRUE)
 
 # Apply simulation function
 CH.J <- simul.cjs(PHI.J, P.J, marked.j)
-CH.A <- simul.cjs(PHI.A, P.A, marked.a)
 
 
 # Convert CH to m-array ---------------------------------------------------
@@ -111,7 +105,7 @@ for (i in 1:dim(CH.J.R)[1]){
 }
 
 # Add grown-up juveniles to adults and create m-array
-CH.A.m <- rbind(CH.A, CH.J.R1)
+CH.A.m <- rbind(CH.J.R1)
 CH.A.marray <- marray(CH.A.m)
 
 # Create CH matrix for juveniles, ignoring subsequent recaptures
