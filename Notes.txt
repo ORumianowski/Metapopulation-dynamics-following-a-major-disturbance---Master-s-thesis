@@ -348,8 +348,13 @@ This has the advantage of much faster computation, but
 the disadvantage of reduced flexibility in the modeling. In particular,
 models with individual effects can no longer be fitted
 
+## 16/01/2024 - mardi
 
+Function to create a m-array based on capture-histories (CH)
 
+p223 ?? Bayesian p-values ??
+
+conversion du modele bugs to nimble: il faut spécifier la dimension des matrices
 
 
 

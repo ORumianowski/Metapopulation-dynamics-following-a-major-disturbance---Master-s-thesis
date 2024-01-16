@@ -108,7 +108,111 @@ marray <- function(CH){
   for (i in 1:nind){
     pos <- which(CH[i,]!=0)
     g <- length(pos)
-    for (z in 1:(g−1)){
+    for (z in 1:(g-1)){
       m.array[pos[z],pos[z+1]] <- m.array[pos[z],pos[z+1]] + 1
     } #z
   } #i
+  # Calculate the number of individuals that is never recaptured
+  for (t in 1:n.occasions){
+    m.array[t,n.occasions+1] <- m.array[t,1] -
+      sum(m.array[t,2:n.occasions])
+  }
+  out <- m.array[1:(n.occasions-1),2:(n.occasions+1)]
+  return(out)
+}
+
+marray_res = marray(CH)
+
+
+# m-array time-dependant model -----------------------------------------------------------
+
+
+
+library(nimble)
+
+CJSCode = nimbleCode(code =
+                       {
+                         # Priors and constraints
+                         for (t in 1:(n.occasions-1)){
+                           phi[t] ~ dunif(0, 1) # Priors for survival
+                           p[t] ~ dunif(0, 1) # Priors for recapture
+                         }
+                         # Define the multinomial likelihood
+                         for (t in 1:(n.occasions-1)){
+                           marr[t,1:n.occasions] ~ dmulti(pr[t,1:10], r[t])
+                         }
+        
+                         # Define the cell probabilities of the m-array
+                         # Main diagonal
+                         for (t in 1:(n.occasions-1)){
+                           q[t] <- 1-p[t] # Probability of non-recapture
+                           pr[t,t] <- phi[t]*p[t]
+                           # Above main diagonal
+                           for (j in (t+1):(n.occasions-1)){
+                             pr[t,j] <- prod(phi[t:j])*prod(q[t:(j-1)])*p[j]
+                           } #j
+                           # Below main diagonal
+                           for (j in 1:(t-1)){
+                             pr[t,j] <- 0
+                           } #j
+                         } #t
+                         # Last column: probability of non-recapture
+                         for (t in 1:(n.occasions-1)){
+                           pr[t,n.occasions] <- 1-sum(pr[t,1:(n.occasions-1)])
+                         } #t
+                      
+                       }#,
+                     
+              #    dimensions = list(pr = c((n.occasions-1), (n.occasions-1)),
+              #                      marr = c((n.occasions-1), (n.occasions)))
+)
+
+
+
+# Create the m-array from the capture-histories
+marr <- marray_res
+
+CJSData <- list(marr = marr)
+
+r = c()
+# Calculate the number of birds released each year
+for (t in 1:(n.occasions-1)){
+  r[t] <- sum(marr[t,1:10])
+}
+
+CJSConsts <- list(n.occasions = dim(marr)[2], r = r )
+
+# Initial values
+inits <- function(){list(phi = runif(dim(marr)[2]-1, 0, 1),
+                         p = runif(dim(marr)[2]-1, 0, 1))}
+inits = inits()
+
+# Parameters monitored
+parameters <- c("phi", "p")
+
+# MCMC settings
+ni <- 10000
+nt <- 3
+nb <- 5000
+nc <- 3
+
+# -------------------------------------------------------------------------
+# Version compact
+
+mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
+                       data = CJSData, inits = inits,
+                       monitors = parameters,
+                       niter = ni, nchains = nc, nburnin = nb, thin = nt,
+                       summary = TRUE, WAIC = TRUE)
+
+mcmc.out$summary
+
+
+
+
+
+
+
+
+
+

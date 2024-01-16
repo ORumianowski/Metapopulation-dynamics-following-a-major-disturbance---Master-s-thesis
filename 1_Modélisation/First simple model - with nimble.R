@@ -225,22 +225,22 @@ mcmc.out$summary
 
 # -------------------------------------------------------------------------
 # Version self-designed
-
-CJS <- nimbleModel(code = CJSCode, name = "CJS", constants = CJSConsts,
-                   data = CJSData, inits = CJSInits)
-
-CCJS<- compileNimble(CJS)
-
-CJSConf <- configureMCMC(CJS, print = TRUE)
-
-# CJSConf$addMonitors(c("beta", "mean.p", "z")) # a essayer
-
-CJSMCMC <- buildMCMC(CJSConf)
-CCJSMCMC <- compileNimble(CJSMCMC, project = CJS)
-
-niter <- 400
-
-set.seed(1)
-samples <- runMCMC(CCJSMCMC, niter = niter)
-
-summary(samples)
+# 
+# CJS <- nimbleModel(code = CJSCode, name = "CJS", constants = CJSConsts,
+#                    data = CJSData, inits = CJSInits)
+# 
+# CCJS<- compileNimble(CJS)
+# 
+# CJSConf <- configureMCMC(CJS, print = TRUE)
+# 
+# # CJSConf$addMonitors(c("beta", "mean.p", "z")) # a essayer
+# 
+# CJSMCMC <- buildMCMC(CJSConf)
+# CCJSMCMC <- compileNimble(CJSMCMC, project = CJS)
+# 
+# niter <- 400
+# 
+# set.seed(1)
+# samples <- runMCMC(CCJSMCMC, niter = niter)
+# 
+# summary(samples)
