@@ -54,3 +54,5 @@ Objectifs:
 - isoler les paramètres nécessaires spécifiques à notre dataset pour la première simulation simple
 - model ave m-array format avec age
 
+7.10.3 Age-Dependent Models
+

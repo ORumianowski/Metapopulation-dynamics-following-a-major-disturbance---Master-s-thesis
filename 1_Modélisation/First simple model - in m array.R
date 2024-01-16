@@ -208,7 +208,9 @@ mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
 mcmc.out$summary
 
 
-
+hist(mcmc.out$samples$chain1[,1], nclass = 30, col = "gray", main = "",
+     xlab = "Juvenile survival", ylab = "Frequency")
+abline(v = 0.5, col = "red", lwd = 2)
 
 
 
