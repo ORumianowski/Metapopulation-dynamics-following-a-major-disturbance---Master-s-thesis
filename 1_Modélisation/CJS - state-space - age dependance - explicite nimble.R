@@ -9,13 +9,29 @@ total.marked.j <- 550 # 55000   # Total number of marked juveniles
 
 n.occasions <-  (2023 - 1986) # Number of capture occasions  # p32 thèse Perron
 marked.j <- rep( trunc(total.marked.j / n.occasions), n.occasions-1) # Annual number of newly marked juveniles
+marked.a <- rep(1, n.occasions-1) # Annual number of newly marked adults
 phi.juv <- 0.243  # Juvenile annual survival # p42 thèse Perron
 phi.ad <- 0.844 # Adult annual survival # p42 thèse Perron
-p <- rep(0.2, n.occasions-1) # Recapture # p137 Perron
+
+prob.recap.mean = 0.2
+#p <- rep(prob.recap.mean, n.occasions-1) # Recapture # p137 Perron
+
+# Alternative pour la probabilité de recapture
+# Paramètres de la loi beta
+esperance <- prob.recap.mean
+ecart_type <- 0.1
+
+# Calcul des paramètres alpha et beta de la loi beta
+alpha <- (esperance^2 * (1 - esperance)) / ecart_type^2 - esperance
+beta <- alpha * (1 / esperance - 1)
+
+# # Recapture variable
+p <-rbeta(n.occasions-1, alpha, beta)
 
 #The estimated detection probabilities (averaged overtime) were 0.08 (0.05; 0.10) and 0.48 (0.41; 0.55) in the low- and high-detectability classes. 
 
 phi.j <- c(phi.juv, rep(phi.ad,n.occasions-2))
+
 
 
 # Define function to simulate a capture-history (CH) matrix
@@ -144,53 +160,71 @@ cjs.init.z <- function(ch,f){
 # Initial values
 inits <- function(){list(z = cjs.init.z(CH, f), beta = runif(2, 0, 1),
                          mean.p = runif(1, 0, 1))}
+CJSInits = inits()
 
 # Parameters monitored
 parameters <- c("beta", "mean.p")
 
 # MCMC settings
-ni <- 600
-nt <- 2
-nb <- 100
+ni <- 300
+nt <- 1
+nb <- 50
 nc <- 2
 
-CJSConsts <- list(f = f, nind = dim(CH)[1], n.occasions = dim(CH)[2], z = known.state.cjs(CH), x = x)
+# Run ---------------------------------------------------------------------
 
-CJSData <- list(y = CH)
+# mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
+#                        data = CJSData, inits = inits,
+#                        monitors = parameters,
+#                        niter = ni, nchains = nc, nburnin = nb, thin = nt,
+#                        summary = TRUE, WAIC = TRUE)
 
-CJSInits = inits()
+# Version self-designed
+CJS <- nimbleModel(code = CJSCode, name = "CJS", constants = CJSConsts,
+                   data = CJSData, inits = CJSInits)
+CCJS<- compileNimble(CJS)
 
-# -------------------------------------------------------------------------
-start_time <- proc.time()
-mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
-                       data = CJSData, inits = CJSInits,
-                       monitors = parameters,
-                       niter = ni, nchains = nc, nburnin = nb, thin = nt,
-                       summary = TRUE, WAIC = TRUE)
-end_time <- proc.time()
+CJSConf <- configureMCMC(CJS, enableWAIC = TRUE, print = TRUE)
 
-elapsed_time <- end_time - start_time
-print(elapsed_time)
+CJSMCMC <- buildMCMC(CJSConf)
+CCJSMCMC <- compileNimble(CJSMCMC, project = CJS)
 
-mcmc.out$summary
+mcmc.out <- runMCMC(CCJSMCMC,
+                    niter = ni, nchains = nc,
+                    nburnin = nb, thin = nt,
+                    inits = inits, setSeed = TRUE,
+                    samples = TRUE, summary = TRUE)
 
-# Plot --------------------------------------------------------------------
+
+# CCJSMCMC$run(niter = ni, time = TRUE)
+# CCJSMCMC$getTimes()
+# calculateWAIC(CCJSMCMC)
+
+
+# Check and plot ----------------------------------------------------------
+
+
+MCMCvis::MCMCtrace(object = mcmc.out[["samples"]],
+                   pdf = FALSE, # no export to PDF
+                   ind = TRUE)
+
+MCMCvis::MCMCsummary(mcmc.out[["samples"]])
 
 samples = rbind(mcmc.out$samples$chain1,
-                mcmc.out$samples$chain2)
+                mcmc.out$samples$chain2,
+                mcmc.out$samples$chain3)
 
 par(mfrow = c(1, 3), las = 1)
 
-hist(samples[,3], nclass = 30, col = "gray", main = "",
-     xlab = "mean.p", ylab = "Frequency")
-abline(v = p, col = "red", lwd = 2)
-
 hist(samples[,1], nclass = 30, col = "gray", main = "",
+     xlab = "mean.p", ylab = "Frequency")
+abline(v = prob.recap.mean, col = "red", lwd = 2)
+
+hist(samples[,3], nclass = 30, col = "gray", main = "",
      xlab = "mean.phijuv", ylab = "Frequency")
 abline(v = phi.juv, col = "red", lwd = 2)
 
 hist(samples[,2], nclass = 30, col = "gray", main = "",
      xlab = "mean.phiad", ylab = "Frequency")
 abline(v = phi.ad, col = "red", lwd = 2)
-
 

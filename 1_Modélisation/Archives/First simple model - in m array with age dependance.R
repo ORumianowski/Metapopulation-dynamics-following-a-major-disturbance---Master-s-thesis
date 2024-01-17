@@ -31,8 +31,7 @@ simul.cjs <- function(PHI, P, marked){
   for (i in 1:sum(marked)){    # sum(marked) == nombre de marqués
     
     CH[i, mark.occ[i]] <- 1 # Write an 1 at the release occasion
-    if (mark.occ[i]==n.occasions) next # normalement pas possible, car marked ne comprend pas les marqués de dernière occasion
-    
+    if (mark.occ[i]==n.occasions) next 
     for (t in (mark.occ[i]+1):n.occasions){
       # Bernoulli trial: does individual survive occasion?
       sur <- rbinom(1, 1, PHI[i,t-1])
@@ -221,6 +220,7 @@ mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
 
 mcmc.out$summary
 
+getTimes(mcmc.out)
 
 # Plot --------------------------------------------------------------------
 

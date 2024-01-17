@@ -356,7 +356,7 @@ p223 ?? Bayesian p-values ??
 
 conversion du modele bugs to nimble: il faut spécifier la dimension des matrices
 
-
+It is most useful for determining effective blocking strategies that can be re-used for later runs
 
 
 

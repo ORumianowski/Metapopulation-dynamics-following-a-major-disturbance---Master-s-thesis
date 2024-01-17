@@ -59,5 +59,11 @@ Objectifs:
 
 ## 17/01/2024 - mercreci
 
-- m-array model : enlever les adults marqués
+- continuer la documentation nimble
 - nettoyer le script state space
+
+? mes chaines ont-elles bien des initialisation différentes ?
+
+7.10 Variable selection using Reversible Jump MCMC
+
+parallèles chaines
