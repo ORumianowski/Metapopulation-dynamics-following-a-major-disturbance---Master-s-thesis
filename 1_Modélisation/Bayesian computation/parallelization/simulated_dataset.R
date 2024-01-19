@@ -34,6 +34,8 @@ beta <- alpha * (1 / esperance - 1)
 # # Recapture variable
 p <-rbeta(n.occasions-1, alpha, beta)
 
+#mean(p)
+
 #The estimated detection probabilities (averaged overtime) were 0.08 (0.05; 0.10) and 0.48 (0.41; 0.55) in the low- and high-detectability classes. 
 
 phi.j <- c(phi.juv, rep(phi.ad,n.occasions-2))
