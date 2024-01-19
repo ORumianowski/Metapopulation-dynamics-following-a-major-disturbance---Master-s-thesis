@@ -67,3 +67,16 @@ Objectifs:
 7.10 Variable selection using Reversible Jump MCMC
 
 parallèles chaines
+
+## 18/01/2024 - jeudi
+
+Objectifs:
+- mon compte ifb
+- parallèlisation des chaines avec nimble
+- complexification cmr - kery2022
+
+
+## 18/01/2024 - jeudi
+
+- job sur meso
+- parallélisation

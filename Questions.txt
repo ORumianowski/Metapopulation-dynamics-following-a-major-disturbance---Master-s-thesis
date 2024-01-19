@@ -2,5 +2,3 @@ Questions
 
 - Nimble ne semble pas proposer une version direct pour run MCMC chains en parallèle, c'est quand même imporant de le faire ?
  
-
-- je ne suis pas certian que mon script initialiser différents mes chaines

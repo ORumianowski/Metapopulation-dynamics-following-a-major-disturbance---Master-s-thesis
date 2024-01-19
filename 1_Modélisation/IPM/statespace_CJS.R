@@ -1,79 +1,17 @@
 
 library(nimble)
 
-# Simulated Dataset  ------------------------------------------------------
+# Simulated Dataset 
 
-# Dataset properties : define parameter values
+source("simulated_dataset.R")
 
-total.marked.j <- 550 # 55000   # Total number of marked juveniles
+total.marked.j = 55000
+n.occasions = (2023 - 1986)
 
-n.occasions <-  (2023 - 1986) # Number of capture occasions  # p32 thèse Perron
-marked.j <- rep( trunc(total.marked.j / n.occasions), n.occasions-1) # Annual number of newly marked juveniles
-marked.a <- rep(1, n.occasions-1) # Annual number of newly marked adults
-phi.juv <- 0.243  # Juvenile annual survival # p42 thèse Perron
-phi.ad <- 0.844 # Adult annual survival # p42 thèse Perron
-
-prob.recap.mean = 0.2
-#p <- rep(prob.recap.mean, n.occasions-1) # Recapture # p137 Perron
-
-# Alternative pour la probabilité de recapture
-# Paramètres de la loi beta
-esperance <- prob.recap.mean
-ecart_type <- 0.1
-
-# Calcul des paramètres alpha et beta de la loi beta
-alpha <- (esperance^2 * (1 - esperance)) / ecart_type^2 - esperance
-beta <- alpha * (1 / esperance - 1)
-
-# # Recapture variable
-p <-rbeta(n.occasions-1, alpha, beta)
-
-#The estimated detection probabilities (averaged overtime) were 0.08 (0.05; 0.10) and 0.48 (0.41; 0.55) in the low- and high-detectability classes. 
-
-phi.j <- c(phi.juv, rep(phi.ad,n.occasions-2))
+CH.J = simul_data(total.marked.j = total.marked.j, n.occasions = n.occasions)$CH.J
 
 
-
-# Define function to simulate a capture-history (CH) matrix
-simul.cjs <- function(PHI, P, marked){
-  n.occasions <- dim(PHI)[2] + 1
-  CH <- matrix(0, ncol = n.occasions, nrow = sum(marked))
-  # Define a vector with the occasion of marking
-  mark.occ <- rep(1:length(marked), marked[1:length(marked)]) # marked[1:length(marked)] ==?? marked
-  
-  # Fill the CH matrix
-  for (i in 1:sum(marked)){    # sum(marked) == nombre de marqués
-    
-    CH[i, mark.occ[i]] <- 1 # Write an 1 at the release occasion
-    if (mark.occ[i]==n.occasions) next # normalement pas possible, car marked ne comprend pas les marqués de dernière occasion
-    
-    for (t in (mark.occ[i]+1):n.occasions){
-      # Bernoulli trial: does individual survive occasion?
-      sur <- rbinom(1, 1, PHI[i,t-1])
-      if (sur==0) break # If dead, move to next individual
-      # Bernoulli trial: is individual recaptured?
-      rp <- rbinom(1, 1, P[i,t-1])
-      if (rp==1) CH[i,t] <- 1
-    } #t
-  } #i
-  return(CH)
-}
-
-# Define matrices with survival and recapture probabilities
-PHI.J <- matrix(0, ncol = n.occasions-1, nrow = sum(marked.j))
-for (i in 1:(length(marked.j)-1)){
-  PHI.J[(sum(marked.j[1:i])-
-           marked.j[i]+1):sum(marked.j[1:i]),i:(n.occasions-1)] <-
-    matrix(rep(phi.j[1:(n.occasions-i)], marked.j[i]),
-           ncol = n.occasions-i, byrow = TRUE)
-}
-P.J <- matrix(rep(p, sum(marked.j)), ncol =
-                n.occasions-1, nrow = sum(marked.j), byrow = TRUE) 
-
-# Apply simulation function
-CH.J <- simul.cjs(PHI.J, P.J, marked.j)
-
-
+# Récupération des constantes nécessaires au modèle -----------------------
 
 # Create vector with occasion of marking   
 get.first <- function(x) min(which(x!=0))
@@ -160,16 +98,19 @@ cjs.init.z <- function(ch,f){
 # Initial values
 inits <- function(){list(z = cjs.init.z(CH, f), beta = runif(2, 0, 1),
                          mean.p = runif(1, 0, 1))}
-CJSInits = inits()
 
 # Parameters monitored
 parameters <- c("beta", "mean.p")
 
 # MCMC settings
-ni <- 300
+ni <- 500
 nt <- 1
 nb <- 50
 nc <- 2
+
+CJSConsts <- list(f = f, nind = dim(CH)[1], n.occasions = dim(CH)[2], z = known.state.cjs(CH), x = x)
+
+CJSData <- list(y = CH)
 
 # Run ---------------------------------------------------------------------
 
@@ -180,11 +121,14 @@ nc <- 2
 #                        summary = TRUE, WAIC = TRUE)
 
 # Version self-designed
+
+start_time <- proc.time()
+
 CJS <- nimbleModel(code = CJSCode, name = "CJS", constants = CJSConsts,
-                   data = CJSData, inits = CJSInits)
+                   data = CJSData, inits = inits())
 CCJS<- compileNimble(CJS)
 
-CJSConf <- configureMCMC(CJS, enableWAIC = TRUE, print = TRUE)
+CJSConf <- configureMCMC(CJS, enableWAIC = FALSE, print = FALSE)
 
 CJSMCMC <- buildMCMC(CJSConf)
 CCJSMCMC <- compileNimble(CJSMCMC, project = CJS)
@@ -201,6 +145,11 @@ mcmc.out <- runMCMC(CCJSMCMC,
 # calculateWAIC(CCJSMCMC)
 
 
+end_time <- proc.time()
+
+elapsed_time <- end_time - start_time
+print(elapsed_time)
+
 # Check and plot ----------------------------------------------------------
 
 
@@ -213,6 +162,10 @@ MCMCvis::MCMCsummary(mcmc.out[["samples"]])
 samples = rbind(mcmc.out$samples$chain1,
                 mcmc.out$samples$chain2,
                 mcmc.out$samples$chain3)
+
+prob.recap.mean = 0.2
+phi.juv <- 0.243  
+phi.ad <- 0.844
 
 par(mfrow = c(1, 3), las = 1)
 
