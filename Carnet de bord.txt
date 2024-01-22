@@ -80,3 +80,16 @@ Objectifs:
 
 - job sur meso
 - parallélisation
+
+
+## 19/01/2024 - jeudi
+
+- DAG de Perron : multisit, intégré et perron
+
+## 22/01/2024 - lundi
+
+- lire IPM de Kery 2022 - chapter 5
+- prendre en mains le code ce prmeier simple IPM
+- trouver le DAG de Perron
+
+
