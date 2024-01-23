@@ -92,7 +92,7 @@ Objectifs:
 -re prendre à 5.5 p230 pour la partie sur la simulation ds données 
 - prendre en mains le code ce prmeier simple IPM
 
-## 23/01/2024 - lundi
+## 23/01/2024 - mardi
 - trouver le DAG de Perron
-
+- prendre en mains le code ce prmeier simple IPM
 
