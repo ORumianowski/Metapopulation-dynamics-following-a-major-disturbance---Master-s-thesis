@@ -1,19 +1,67 @@
 
-
-library(parallel)
 library(nimble)
 
-# Simulated dataset -------------------------------------------------------
+# Simulated Dataset  ------------------------------------------------------
 
-source("R/simulated_dataset.R")
+# Dataset properties : define parameter values
 
-total.marked.j = 55000
-n.occasions = (2023 - 1986)
+total.marked.j <- 55000 # 55000   # Total number of marked juveniles
 
-simulated_dataset = simul_data(total.marked.j = total.marked.j, n.occasions = n.occasions)
+n.occasions <-  (2023 - 1986) # Number of capture occasions  # p32 thèse Perron
+marked.j <- rep( trunc(total.marked.j / n.occasions), n.occasions-1) # Annual number of newly marked juveniles
+marked.a <- rep(1, n.occasions-1) # Annual number of newly marked adults
+phi.juv <- 0.243  # Juvenile annual survival # p42 thèse Perron
+phi.ad <- 0.844 # Adult annual survival # p42 thèse Perron
+p <- rep(0.2, n.occasions-1) # Recapture # p137 Perron
 
-CH.J = simulated_dataset$CH.J
-CH.A = simulated_dataset$CH.A
+#The estimated detection probabilities (averaged overtime) were 0.08 (0.05; 0.10) and 0.48 (0.41; 0.55) in the low- and high-detectability classes. 
+
+phi.j <- c(phi.juv, rep(phi.ad,n.occasions-2))
+phi.a <- rep(phi.ad, n.occasions-1)
+
+
+# Define function to simulate a capture-history (CH) matrix
+simul.cjs <- function(PHI, P, marked){
+  n.occasions <- dim(PHI)[2] + 1
+  CH <- matrix(0, ncol = n.occasions, nrow = sum(marked))
+  # Define a vector with the occasion of marking
+  mark.occ <- rep(1:length(marked), marked[1:length(marked)]) # marked[1:length(marked)] ==?? marked
+  
+  # Fill the CH matrix
+  for (i in 1:sum(marked)){    # sum(marked) == nombre de marqués
+    
+    CH[i, mark.occ[i]] <- 1 # Write an 1 at the release occasion
+    if (mark.occ[i]==n.occasions) next 
+    for (t in (mark.occ[i]+1):n.occasions){
+      # Bernoulli trial: does individual survive occasion?
+      sur <- rbinom(1, 1, PHI[i,t-1])
+      if (sur==0) break # If dead, move to next individual
+      # Bernoulli trial: is individual recaptured?
+      rp <- rbinom(1, 1, P[i,t-1])
+      if (rp==1) CH[i,t] <- 1
+    } #t
+  } #i
+  return(CH)
+}
+
+# Define matrices with survival and recapture probabilities
+PHI.J <- matrix(0, ncol = n.occasions-1, nrow = sum(marked.j))
+for (i in 1:(length(marked.j)-1)){
+  PHI.J[(sum(marked.j[1:i])-
+         marked.j[i]+1):sum(marked.j[1:i]),i:(n.occasions-1)] <-
+    matrix(rep(phi.j[1:(n.occasions-i)], marked.j[i]),
+           ncol = n.occasions-i, byrow = TRUE)
+}
+P.J <- matrix(rep(p, sum(marked.j)), ncol =
+                n.occasions-1, nrow = sum(marked.j), byrow = TRUE) 
+PHI.A <- matrix(rep(phi.a, sum(marked.a)), ncol = n.occasions-1,
+                nrow = sum(marked.a), byrow = TRUE)
+P.A <- matrix(rep(p, sum(marked.a)), ncol = n.occasions-1,
+              nrow = sum(marked.a), byrow = TRUE)
+
+# Apply simulation function
+CH.J <- simul.cjs(PHI.J, P.J, marked.j)
+CH.A <- simul.cjs(PHI.A, P.A, marked.a)
 
 
 # Convert CH to m-array ---------------------------------------------------
@@ -87,15 +135,9 @@ CH.J.N.marray <- marray(CH.J.N)
 CH.J.marray <- CH.J.R.marray + CH.J.N.marray
 
 
-
-# Parallelization ---------------------------------------------------------
-
-this_cluster <- makeCluster(4)
-set.seed(10120)
-
 # Model and computational parameters --------------------------------------
 
-myCode = nimbleCode(code =
+CJSCode = nimbleCode(code =
                        {
                          # Priors and constraints
                          for (t in 1:(n.occasions-1)){
@@ -148,86 +190,55 @@ for (t in 1:(n.occasions-1)){
 }
 
 # Constants
-consts <- list(n.occasions = dim(CH.J.marray)[2], r.j = r.j,  r.a = r.a)
+CJSConsts <- list(n.occasions = dim(CH.J.marray)[2], r.j = r.j,  r.a = r.a)
 
 # Bundle data
-mydata <- list(marr.j = CH.J.marray, marr.a = CH.A.marray,
-                n.occasions = dim(CH.J.marray)[2])
+CJSData <- list(marr.j = CH.J.marray, marr.a = CH.A.marray,
+                  n.occasions = dim(CH.J.marray)[2])
+# Initial values
+inits <- function(){list(mean.phijuv = runif(1, 0, 1), mean.phiad =
+                           runif(1, 0, 1), mean.p = runif(1, 0, 1))}
+inits = inits()
+
+# Parameters monitored
+parameters <- c("mean.phijuv", "mean.phiad", "mean.p")
+
+# MCMC settings
+ni <- 3000
+nt <- 3
+nb <- 1000
+nc <- 3
 
 
+# Run ---------------------------------------------------------------------
 
-# Create a function with all the needed code
-run_MCMC_allcode <- function(seed, data, code, useWAIC = TRUE, constants) {
-  library(nimble)
-  
-  # Initial values
-  inits <- function(){list(mean.phijuv = runif(1, 0, 1), mean.phiad =
-                             runif(1, 0, 1), mean.p = runif(1, 0, 1))}
-  
-  inits = inits()
-  
-  # Parameters monitored
-  parameters <- c("mean.phijuv", "mean.phiad", "mean.p")
-  
-  # MCMC settings
-  ni <- 5000
-  nt <- 3
-  nb <- 1000
-  nc <- 2
-  
-  CJS <- nimbleModel(code = code, name = "CJS", constants = constants,
-                     data = data, inits = inits)
-  CCJS<- compileNimble(CJS)
-  
-  CJSConf <- configureMCMC(CJS, enableWAIC = TRUE, print = TRUE)
-  
-  CJSMCMC <- buildMCMC(CJSConf)
-  CCJSMCMC <- compileNimble(CJSMCMC, project = CJS)
-  
-  results <- runMCMC(CCJSMCMC,
-                      niter = ni, nchains = nc,
-                      nburnin = nb, thin = nt,
-                      inits = inits, setSeed = TRUE,
-                      samples = TRUE, summary = TRUE)
-  
-  
-  return(results)
-}
+mcmc.out <- nimbleMCMC(code = CJSCode, constants = CJSConsts,
+                       data = CJSData, inits = inits,
+                       monitors = parameters,
+                       niter = ni, nchains = nc, nburnin = nb, thin = nt,
+                       summary = TRUE, WAIC = TRUE)
 
-chain_output <- parLapply(cl = this_cluster, X = 1:4, 
-                          fun = run_MCMC_allcode, 
-                          data = mydata, code = myCode,
-                          constants = consts)
+mcmc.out$summary
 
-stopCluster(this_cluster)
+getTimes(mcmc.out)
 
+# Plot --------------------------------------------------------------------
 
-chaine1 = chain_output[[1]][["samples"]][[1]]
-chaine2 = chain_output[[1]][["samples"]][[2]]
+samples = rbind(mcmc.out$samples$chain1,
+                mcmc.out$samples$chain2,
+                mcmc.out$samples$chain3)
 
-chaine3 = chain_output[[2]][["samples"]][[1]]
-chaine4 = chain_output[[2]][["samples"]][[2]]
+par(mfrow = c(1, 3), las = 1)
 
-chaine5 = chain_output[[3]][["samples"]][[1]]
-chaine6 = chain_output[[3]][["samples"]][[2]]
+hist(samples[,1], nclass = 30, col = "gray", main = "",
+     xlab = "mean.p", ylab = "Frequency")
+abline(v = p, col = "red", lwd = 2)
 
-chaine7 = chain_output[[4]][["samples"]][[1]]
-chaine8 = chain_output[[4]][["samples"]][[2]]
+hist(samples[,3], nclass = 30, col = "gray", main = "",
+     xlab = "mean.phijuv", ylab = "Frequency")
+abline(v = phi.juv, col = "red", lwd = 2)
 
-all_chains = list(chaine1 = chaine1,
-                  chaine2 = chaine2,
-                  chaine3 = chaine3,
-                  chaine4 = chaine4,
-                  chaine5 = chaine5,
-                  chaine6 = chaine6,
-                  chaine7 = chaine7,
-                  chaine8 = chaine8
-                  )
-
-
-# Saved (for cluster) -----------------------------------------------------
-
-save(all_chains, file = "output/all_chains.Rda")
-
-
+hist(samples[,2], nclass = 30, col = "gray", main = "",
+     xlab = "mean.phiad", ylab = "Frequency")
+abline(v = phi.ad, col = "red", lwd = 2)
 
