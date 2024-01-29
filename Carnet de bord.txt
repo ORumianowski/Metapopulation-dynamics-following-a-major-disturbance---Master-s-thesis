@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Rumianowski Odin
 
 Objectifs / Résumé / Notes / Questions
@@ -106,3 +107,115 @@ Objectifs:
 
 
 
+=======
+Rumianowski Odin
+
+Objectifs / Résumé / Notes / Questions
+
+## 08/01/2024 - lundi
+
+# Résumé
+Lecture de la thèse Perron intro
+
+
+## 09/01/2024 - mardi
+
+Lecture du chap 1 et 2 + résumé du 3 de Perron thèse
+
+
+## 10/01/2024 - mercredi
+
+Arrivé au CEFE + lecture de Lebreton 1992 (jusqu'à model selection tools)
+
+
+## 11/01/2024 - jeudi
+
+Lecture de Kéry 2022:
+
+BAYESIAN COMPUTATION to MULTINOMIAL 
+
+## 12/01/2024 - vendredi
+
+Lecture de Kéry 2012: chap 7 - modele de survie
+jusqu'à la page 203
+
+### Semaine 2
+
+## 15/01/2024 - lundi
+
+Objectifs:
+- script de simulation
+- script CJS - deux classes d'âge
+- optimiser le code dont (si state-space) renseigner les variables latentes évidentes -> déja fait dans le code
+
+- apprendre Nimble
+
+
+Résumé:
+
+- Lecture de One-line invocation of MCMC: nimbleMCMC
+
+- run la simulation et le modele CJS en deux classe d'age avec nimble
+
+
+## 16/01/2024 - mardi
+
+Objectifs:
+- isoler les paramètres nécessaires spécifiques à notre dataset pour la première simulation simple
+- model ave m-array format avec age
+
+7.10.3 Age-Dependent Models
+
+
+## 17/01/2024 - mercreci
+
+- continuer la documentation nimble
+- nettoyer le script state space
+
+? mes chaines ont-elles bien des initialisation différentes ?
+
+7.10 Variable selection using Reversible Jump MCMC
+
+parallèles chaines
+
+## 18/01/2024 - jeudi
+
+Objectifs:
+- mon compte ifb
+- parallèlisation des chaines avec nimble
+- complexification cmr - kery2022
+
+
+## 18/01/2024 - jeudi
+
+- job sur meso
+- parallélisation
+
+
+## 19/01/2024 - jeudi
+
+- DAG de Perron : multisit, intégré et perron
+
+## 22/01/2024 - lundi
+
+- lire IPM de Kery 2022 - chapter 5
+-re prendre à 5.5 p230 pour la partie sur la simulation ds données 
+- prendre en mains le code ce prmeier simple IPM
+
+## 23/01/2024 - mardi
+- trouver le DAG de Perron
+- prendre en mains le code ce prmeier simple IPM
+- lire chap 7
+
+## 24/01/2024 - mercredi
+
+- ecrire le modèle de Perron : DAG, formule de lien, cycle démographique
+- inclure la stochasticité dans IPM
+- lire cormorant
+- ecrire le modele en multinomial: commencer par la partie census (et la tester) puis cmr
+
+## 25/01/2024 - jeudi
+
+- installer rtools
+
+>>>>>>> 2c33ff2863c6f6671e2c82b275eacb5fbac9c0f0

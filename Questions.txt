@@ -1,9 +1,18 @@
+
 Questions
 
-
+- identifiabilité de  p x S_Y ?? cf. Annexe A/B
 - IPM stochastique...
 
-- nimble ne fonctionne pas avec la version de R des ordis fixes ??
+
+- "We use a multistate capture-recapture model formulated with the multinomial likelihood to analyze the capturerecapture data. The multinomial likelihood has substantial computational benefits compared with the state-space
+formulation (Section 4.5.2.2) because the dimension of the data set is greatly reduced, and convergence is typically
+achieved much faster" - Kery 2022 - p487 - l'example à reprendre: multicolony
+
+
+- IPM simple stochastique
+- Perron DAG
+- Cormorant example - multinomial CMR
 
 
 - faire le modele de Perron en Bayesien multinomial (sans ind. effect) das un première temps
