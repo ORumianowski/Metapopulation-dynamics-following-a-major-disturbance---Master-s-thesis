@@ -134,3 +134,200 @@ N[2,1] ~ dunif(1710, 3180)
 B[2,1] ~ dunif(1400, 2600)
 N[3,1] ~ dunif(680, 1270)
 B[3,1] ~ dunif(560, 1040)
+
+# Process model over time: our model of population dynamics
+for (t in 1:(n.years-1)){
+N[1,t+1] <- B[1,t] * rho[1,t] * phi[1,1,t] * eta[1,1,t] + B[2,t] * rho[2,t] * phi[1,2,t] * 
+ eta[2,1,t] + B[3,t] * rho[3,t] * phi[1,3,t] * eta[3,1,t] + N[1,t] * phi[2,1,t] * 
+ (1 - kappa[1,t]) 
+N[2,t+1] <- B[1,t] * rho[1,t] * phi[1,1,t] * eta[1,2,t] + B[2,t] * rho[2,t] * phi[1,2,t] * 
+ eta[2,2,t] + B[3,t] * rho[3,t] * phi[1,3,t] * eta[3,2,t] + N[2,t] * phi[2,2,t] * 
+ (1 - kappa[2,t]) 
+N[3,t+1] <- B[1,t] * rho[1,t] * phi[1,1,t] * eta[1,3,t] + B[2,t] * rho[2,t] * phi[1,2,t] * 
+ eta[2,3,t] + B[3,t] * rho[3,t] * phi[1,3,t] * eta[3,3,t] + N[3,t] * phi[2,3,t] *
+ (1 - kappa[3,t]) 
+B[1,t+1] <- B[1,t] * phi[2,1,t] * nu[1,1,t] + B[2,t] * phi[2,2,t] * nu[2,1,t] + B[3,t] * 
+ phi[2,3,t] * nu[3,1,t] + N[1,t] * phi[2,1,t] * kappa[1,t] 
+B[2,t+1] <- B[1,t] * phi[2,1,t] * nu[1,2,t] + B[2,t] * phi[2,2,t] * nu[2,2,t] + B[3,t] * 
+ phi[2,3,t] * nu[3,2,t] + N[2,t] * phi[2,2,t] * kappa[2,t] 
+B[3,t+1] <- B[1,t] * phi[2,1,t] * nu[1,3,t] + B[2,t] * phi[2,2,t] * nu[2,3,t] + B[3,t] * 
+ phi[2,3,t] * nu[3,3,t] + N[3,t] * phi[2,3,t] * kappa[3,t] 
+}
+# Observation model
+for (t in 1:n.years){
+for (s in 1:3){
+C[s,t] ~ dnorm(B[s,t], tau[s])
+} #s
+} #t
+
+# Multistate capture-recapture data (with multinomial likelihood)
+# Define state-transition and re-encounter probabilities
+for (t in 1:(n.years-1)){
+psi[1,t,1] <- 0
+psi[1,t,2] <- 0
+psi[1,t,3] <- 0
+psi[1,t,4] <- 0
+psi[1,t,5] <- 0
+psi[1,t,6] <- 0
+psi[1,t,7] <- phi[1,1,t] * eta[1,1,t]
+psi[1,t,8] <- phi[1,1,t] * eta[1,2,t]
+psi[1,t,9] <- phi[1,1,t] * eta[1,3,t]
+psi[2,t,1] <- 0
+psi[2,t,2] <- 0
+psi[2,t,3] <- 0
+psi[2,t,4] <- 0
+psi[2,t,5] <- 0
+psi[2,t,6] <- 0
+psi[2,t,7] <- phi[1,2,t] * eta[2,1,t]
+psi[2,t,8] <- phi[1,2,t] * eta[2,2,t]
+psi[2,t,9] <- phi[1,2,t] * eta[2,3,t]
+psi[3,t,1] <- 0
+psi[3,t,2] <- 0
+psi[3,t,3] <- 0
+psi[3,t,4] <- 0
+psi[3,t,5] <- 0
+psi[3,t,6] <- 0
+psi[3,t,7] <- phi[1,3,t] * eta[3,1,t]
+psi[3,t,8] <- phi[1,3,t] * eta[3,2,t]
+psi[3,t,9] <- phi[1,3,t] * eta[3,3,t]
+psi[4,t,1] <- 0
+psi[4,t,2] <- 0
+psi[4,t,3] <- 0
+psi[4,t,4] <- phi[2,1,t] * nu[1,1,t]
+psi[4,t,5] <- phi[2,1,t] * nu[1,2,t]
+psi[4,t,6] <- phi[2,1,t] * nu[1,3,t]
+psi[4,t,7] <- 0
+psi[4,t,8] <- 0
+psi[4,t,9] <- 0
+psi[5,t,1] <- 0
+psi[5,t,2] <- 0
+psi[5,t,3] <- 0
+psi[5,t,4] <- phi[2,2,t] * nu[2,1,t]
+psi[5,t,5] <- phi[2,2,t] * nu[2,2,t]
+psi[5,t,6] <- phi[2,2,t] * nu[2,3,t]
+psi[5,t,7] <- 0
+psi[5,t,8] <- 0
+psi[5,t,9] <- 0
+psi[6,t,1] <- 0
+psi[6,t,2] <- 0
+psi[6,t,3] <- 0
+psi[6,t,4] <- phi[2,3,t] * nu[3,1,t]
+psi[6,t,5] <- phi[2,3,t] * nu[3,2,t]
+psi[6,t,6] <- phi[2,3,t] * nu[3,3,t]
+psi[6,t,7] <- 0
+psi[6,t,8] <- 0
+psi[6,t,9] <- 0
+psi[7,t,1] <- 0
+psi[7,t,2] <- 0
+psi[7,t,3] <- 0
+psi[7,t,4] <- phi[2,1,t] * kappa[1,t]
+psi[7,t,5] <- 0
+psi[7,t,6] <- 0
+psi[7,t,7] <- phi[2,1,t] * (1-kappa[1,t])
+psi[7,t,8] <- 0
+psi[7,t,9] <- 0
+psi[8,t,1] <- 0
+psi[8,t,2] <- 0
+psi[8,t,3] <- 0
+psi[8,t,4] <- 0
+psi[8,t,5] <- phi[2,2,t] * kappa[2,t]
+psi[8,t,6] <- 0
+psi[8,t,7] <- 0
+psi[8,t,8] <- phi[2,2,t] * (1-kappa[2,t])
+psi[8,t,9] <- 0
+psi[9,t,1] <- 0
+psi[9,t,2] <- 0
+psi[9,t,3] <- 0
+psi[9,t,4] <- 0
+psi[9,t,5] <- 0
+psi[9,t,6] <- phi[2,3,t] * kappa[3,t]
+psi[9,t,7] <- 0
+psi[9,t,8] <- 0
+psi[9,t,9] <- phi[2,3,t] * (1-kappa[3,t])
+
+po[1,t] <- 0
+po[2,t] <- 0
+po[3,t] <- 0
+po[4,t] <- p[1,t]
+po[5,t] <- p[2,t]
+po[6,t] <- p[3,t]
+po[7,t] <- 0
+po[8,t] <- 0
+po[9,t] <- 0
+
+# Calculate probability of non-encounter (dq) and reshape the array for the encounter
+# probabilities
+for (s in 1:ns){
+dp[s,t,s] <- po[s,t]
+dq[s,t,s] <- 1-po[s,t]
+} #s
+for (s in 1:(ns-1)){
+for (m in (s+1):ns){
+dp[s,t,m] <- 0
+dq[s,t,m] <- 0
+} #m
+} #s
+for (s in 2:ns){
+for (m in 1:(s-1)){
+dp[s,t,m] <- 0
+dq[s,t,m] <- 0
+} #m
+} #s
+} #t
+
+# Define the multinomial likelihood
+for (t in 1:((n.years-1)*ns)){
+marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,], rel[t])
+}
+# Define the cell probabilities of the multistate m-array
+for (t in 1:(n.years-2)){
+U[(t-1)*ns+(1:ns), (t-1)*ns+(1:ns)] <- ones
+for (j in (t+1):(n.years-1)){
+U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-2)*ns+(1:ns)] %*% 
+ psi[,t,] %*% dq[,t,]
+} #j
+} #t
+U[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- ones
+# Diagonal
+for (t in 1:(n.years-2)){
+pr[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] 
+ %*% psi[,t,] %*% dp[,t,]
+# Above main diagonal
+for (j in (t+1):(n.years-1)){
+pr[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] %*% 
+ psi[,j,] %*% dp[,j,]
+} #j
+} #t
+pr[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- psi[,n.years-1,] %*% dp[,n.years-1,] 
+# Below main diagonal
+for (t in 2:(n.years-1)){
+for (j in 1:(t-1)){
+pr[(t-1)*ns+(1:ns),(j-1)*ns+(1:ns)] <- zero
+} #j
+} #t
+# Last column: probability of non-recapture
+for (t in 1:((n.years-1)*ns)){
+pr[t,(n.years*ns-(ns-1))] <- 1-sum(pr[t,1:((n.years-1)*ns)])
+} #t
+}
+")
+
+# Initial values
+inits <- function(cc=cormorant$count){
+  B <- array(NA, dim=c(3, 14))
+  B[1,1] <- rpois(1, cc[1,1])
+  B[2,1] <- rpois(1, cc[2,1])
+  B[3,1] <- rpois(1, cc[3,1])
+  N <- B * 0.55/0.45
+  return(list(B=B, N=N))
+}
+
+# Parameters monitored
+parameters <- c("beta.phi", "phi", "mu.kappa", "kappa", "p", "mean.eta", "mean.nu", "mean.rho", "sigma",
+                "N", "B")
+# MCMC settings
+ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000
+# Call JAGS from R (ART 143 min) and check convergence
+out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
+             n.thin=nt, n.adapt=na, parallel=TRUE) 
+traceplot(out1)
