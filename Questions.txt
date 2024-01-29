@@ -1,4 +1,9 @@
 Questions
 
-- Nimble ne semble pas proposer une version direct pour run MCMC chains en parallèle, c'est quand même imporant de le faire ?
- 
+
+- IPM stochastique...
+
+- nimble ne fonctionne pas avec la version de R des ordis fixes ??
+
+
+- faire le modele de Perron en Bayesien multinomial (sans ind. effect) das un première temps

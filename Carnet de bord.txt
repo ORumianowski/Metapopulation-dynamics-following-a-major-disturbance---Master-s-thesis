@@ -95,4 +95,14 @@ Objectifs:
 ## 23/01/2024 - mardi
 - trouver le DAG de Perron
 - prendre en mains le code ce prmeier simple IPM
+- lire chap 7
+
+## 24/01/2024 - mercredi
+
+- ecrire le modèle de Perron : DAG, formule de lien, cycle démographique
+- inclure la stochasticité dans IPM
+- lire cormorant
+- ecrire le modele en multinomial: commencer par la partie census (et la tester) puis cmr
+
+
 
