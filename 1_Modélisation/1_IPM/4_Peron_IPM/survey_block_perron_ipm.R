@@ -27,8 +27,6 @@ mydata <- list(C=cormorant$count)
 
 myconsts <- list(n.years=ncol(cormorant$ms.ch))
 
-
-
 mycode = nimbleCode(code ={
   
   # -------------------------------------------------
@@ -64,8 +62,8 @@ mycode = nimbleCode(code ={
   
   # Population count data (state-space model)
   # Models for the initial population size: uniform priors
-  N[1,1] ~ dunif(4270, 7940)
-  B[1,1] ~ dunif(3500, 6500)
+  N[1,1] ~ dunif(4270, 7940) # cormorant$count[1,1] * (0.55/0.45) +/- 30%
+  B[1,1] ~ dunif(3500, 6500) # cormorant$count[1,1] +/- 30%
   N[2,1] ~ dunif(1710, 3180)
   B[2,1] ~ dunif(1400, 2600)
   N[3,1] ~ dunif(680, 1270)
@@ -73,21 +71,37 @@ mycode = nimbleCode(code ={
                  
   # Process model over time: our model of population dynamics
   for (t in 1:(n.years-1)){
-  N[1,t+1] <- B[1,t] * rho[1] * phi[1] * eta[1,1] + B[2,t] * rho[2] * phi[1] * 
-   eta[2,1] + B[3,t] * rho[2] * phi[1] * eta[3,1] + N[1,t] * phi[2] * (1 - kappa[1]) 
-  B[1,t+1] <- B[1,t] * phi[2] * nu[1,1] + B[2,t] * phi[2] * nu[2,1] + B[3,t] * 
-    phi[2] * nu[3,1] + N[1,t] * phi[2] * kappa[1] 
+    # La Ronze
+  N[1,t+1] <- B[1,t] * rho[1] * phi[1] * eta[1,1] + 
+              B[2,t] * rho[2] * phi[1] * eta[2,1] + 
+              B[3,t] * rho[2] * phi[1] * eta[3,1] +
+              N[1,t] * phi[2] * (1 - kappa[1]) 
+
+  B[1,t+1] <- B[1,t] * phi[2] * nu[1,1] +
+              B[2,t] * phi[2] * nu[2,1] + 
+              B[3,t] * phi[2] * nu[3,1] + 
+              N[1,t] * phi[2] * kappa[1] 
   
-  N[2,t+1] <- B[1,t] * rho[1] * phi[1] * eta[1,2] + B[2,t] * rho[2] * phi[1] * 
-   eta[2,2] + B[3,t] * rho[2] * phi[1] * eta[3,2] + N[2,t] * phi[2] * 
-   (1 - kappa[2]) 
-  N[3,t+1] <- B[1,t] * rho[1] * phi[1] * eta[1,3] + B[2,t] * rho[2] * phi[1] * 
-   eta[2,3] + B[3,t] * rho[2] * phi[1] * eta[3,3] + N[3,t] * phi[2] *
-   (1 - kappa[2]) 
-  B[2,t+1] <- B[1,t] * phi[2] * nu[1,2] + B[2,t] * phi[2] * nu[2,2] + B[3,t] * 
-   phi[2] * nu[3,2] + N[2,t] * phi[2] * kappa[2] 
-  B[3,t+1] <- B[1,t] * phi[2] * nu[1,3] + B[2,t] * phi[2] * nu[2,3] + B[3,t] * 
-   phi[2] * nu[3,3] + N[3,t] * phi[2] * kappa[2] 
+  # Les satellites
+  N[2,t+1] <- B[1,t] * rho[1] * phi[1] * eta[1,2] + 
+              B[2,t] * rho[2] * phi[1] * eta[2,2] + 
+              B[3,t] * rho[2] * phi[1] * eta[3,2] + 
+              N[2,t] * phi[2] * (1 - kappa[2]) 
+  
+  N[3,t+1] <- B[1,t] * rho[1] * phi[1] * eta[1,3] + 
+              B[2,t] * rho[2] * phi[1] * eta[2,3] + 
+              B[3,t] * rho[2] * phi[1] * eta[3,3] + 
+              N[3,t] * phi[2] * (1 - kappa[2]) 
+  
+  B[2,t+1] <- B[1,t] * phi[2] * nu[1,2] + 
+              B[2,t] * phi[2] * nu[2,2] +
+              B[3,t] * phi[2] * nu[3,2] + 
+              N[2,t] * phi[2] * kappa[2] 
+  
+  B[3,t+1] <- B[1,t] * phi[2] * nu[1,3] + 
+              B[2,t] * phi[2] * nu[2,3] + 
+              B[3,t] * phi[2] * nu[3,3] + 
+              N[3,t] * phi[2] * kappa[2] 
   }
   
   # Residual (observation) error
@@ -114,6 +128,16 @@ mycode = nimbleCode(code ={
   } #t
     
 })
+
+# Initial values
+inits <- function(cc=cormorant$count){
+  B <- array(NA, dim=c(3, 14))
+  B[1,1] <- rpois(1, cc[1,1])
+  B[2,1] <- rpois(1, cc[2,1])
+  B[3,1] <- rpois(1, cc[3,1])
+  N <- B * 0.55/0.45
+  return(list(B=B, N=N))
+}
 
 
 # Parameters monitored

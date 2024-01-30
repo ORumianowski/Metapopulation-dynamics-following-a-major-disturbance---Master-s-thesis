@@ -221,4 +221,11 @@ Objectifs:
 
 - ticket info - rtools
 - survey part - implementation
+- simulation des données de CMR
+
+## 30/01/2024 - mardi
+
+- relecture survey part & simulation
+- script cmr part
+- rajout de l'ffet "extinction de colonie"
 

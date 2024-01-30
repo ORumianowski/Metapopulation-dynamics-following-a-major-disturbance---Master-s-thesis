@@ -1,6 +1,12 @@
 
 set.seed(1248)
 
+# Matrice stochastique - somme des lignes égales à 1
+
+matrix_sto = function(M){
+  return(M / rowSums(M) )
+  }
+
 # State code
 # 1 : Nestling born in colony 1
 # 2 : Nestling born in colony 2
@@ -23,29 +29,27 @@ set.seed(1248)
 
 n.state = 16
 n.colony = 5 # Number of colonies
-nyears = 40 # Number of years
+nyears = 30 # Number of years
 nmarked = 50 # Number of marked individuals each year and site
 
 # Apparent survival probability
 # - age class dependence
-phi1 = 0.6 # first year
-phiA = 0.85 # subadult and adult
+phi1 = 0.243 # first year
+phiA = 0.844 # subadult and adult
 
 # Natal dispersion from one colony to another
 # - colony dependence
-eta_ = matrix(runif(n = n.colony*n.colony , min = 0, max = 1), 
-             nrow = n.colony, ncol = n.colony) 
-eta = eta_ / rowSums(eta_)
+eta = matrix_sto(matrix(runif(n = n.colony*n.colony , min = 0, max = 1), 
+             nrow = n.colony, ncol = n.colony))
 
 # Breeding dispersion from one colony to another
 # - colony dependence
-nu_ = matrix(runif(n = n.colony*n.colony , min = 0, max = 1), 
-              nrow = n.colony, ncol = n.colony) 
-nu = nu_ / rowSums(nu_)
+nu = matrix_sto(matrix(runif(n = n.colony*n.colony , min = 0, max = 1), 
+              nrow = n.colony, ncol = n.colony)) 
 
 # Recruitment probability
-kappaLR = 0.7 # LaRonze
-kappaSAT = 0.8 # Satellite colonies
+kappaLR = 0.619 # LaRonze
+kappaSAT = 0.846 # Satellite colonies
 kappa = c(kappaLR, kappaSAT)
 
 # Productivity # not used in CMR
@@ -53,7 +57,7 @@ kappa = c(kappaLR, kappaSAT)
 #rhoSAT = 2 # Satellite colonies
 
 # recapture probability
-#- time and colony dependence
+#- time and colony dependence # colony dependence only for the moment
 p = matrix(runif(n = n.colony*n.colony , min = 0.2, max = 0.5),
              nrow = nyears, ncol = n.colony) 
 
@@ -63,18 +67,17 @@ nind = length(f) # Total number of marked individuals
 
 
 # Construct the transition probability matrix (TPM),
-# Includes the dead state as state number 6
+# Includes the dead state as last state 
 # Departure state in rows (time t), arrival state in columns (t+1)
-
 
 # Devenir des nestlings : ligne poussin de TPM
 TMP_nestling = function(birth_colony, n.colony, phi1, eta){
   
   next_state = matrix(0, nrow = 1, ncol = n.state)
   for (next_col in 1:n.colony){
-    next_state[1,(2*n.colony+next_col)] = phi1 * eta[birth_colony,next_col] # nestling become prebreeders 
+    next_state[1,(2*n.colony+next_col)] = phi1 * eta[birth_colony,next_col] # nestling becomes prebreeder
   }
-  next_state[1,n.state] = 1 - phi1 # become dead
+  next_state[1,n.state] = 1 - phi1 # becomes dead
   return(next_state)
 }
 
@@ -83,9 +86,9 @@ TMP_breeder = function(former_colony, n.colony, phiA, nu){
   
   next_state = matrix(0, nrow = 1, ncol = n.state)
   for (next_col in 1:n.colony){
-    next_state[1,(1*n.colony+next_col)] = phiA * nu[former_colony,next_col] # breeders stay breeders
+    next_state[1,(1*n.colony+next_col)] = phiA * nu[former_colony,next_col] # breeder stays breeder
   }
-  next_state[1,n.state] = 1 - phiA # become dead
+  next_state[1,n.state] = 1 - phiA # becomes dead
   return(next_state)
 }
 
@@ -96,15 +99,15 @@ TMP_prebreeder = function(settlement_colony, n.colony, phiA, kappa){
   
   # prebreeders established in LR colony
   if (settlement_colony == 1){
-  next_state[1,(1*n.colony+1)] = phiA * kappa[1] # prebreeders become breeders
-  next_state[1,(2*n.colony+1)] = phiA * (1-kappa[1]) # prebreeders stay prebreeders
+  next_state[1,(1*n.colony+settlement_colony)] = phiA * kappa[1] # prebreeder becomes breeder
+  next_state[1,(2*n.colony+settlement_colony)] = phiA * (1-kappa[1]) # prebreeder stays prebreeder
   }
   # prebreeders established in satellite colonies
   else {
-    next_state[1,(1*n.colony+settlement_colony)] = phiA * kappa[2] # prebreeders become breeders
-    next_state[1,(2*n.colony+settlement_colony)] = phiA * (1-kappa[2]) # prebreeders stay prebreeders
+    next_state[1,(1*n.colony+settlement_colony)] = phiA * kappa[2] # prebreeder becomes breeder
+    next_state[1,(2*n.colony+settlement_colony)] = phiA * (1-kappa[2]) # prebreeder stays prebreeder
   }
-  next_state[1,n.state] = 1 - phiA # become dead
+  next_state[1,n.state] = 1 - phiA # becomes dead
   return(next_state)
 }
 
@@ -118,16 +121,16 @@ for (col in 1:n.colony){
   TPM[(2* n.colony + col),] = TMP_prebreeder(settlement_colony = col, n.colony = n.colony, phiA = phiA, kappa = kappa)
 }
 
-# Last line of TPM : Dead stay dead
+# Last line of TPM : Dead stays dead
 TPM[n.state, ] = 0
 TPM[n.state, n.state] = 1
 
-# Construct the observation probability matrix (OPM), above called THETA
+# Construct the observation probability matrix (OPM)
 # True state is in rows, observed state is in columns
 
 OPM = matrix(0 , nrow= n.state, ncol=n.state)
 for (col in 1:n.colony){
-  OPM[n.colony + col, n.colony + col] = diag(p[1,col],1)
+  OPM[n.colony + col, n.colony + col] = p[1,col]
 }
 OPM[,ncol(OPM)] = c(1-rowSums(OPM))
 
@@ -141,7 +144,7 @@ for (i in 1:nind){
   z[i,f[i]] = initial.state[i]
 }
 
-# Propagate alive/dead process forwards via transition rule (=TPM=OMEGA)
+# Propagate alive/dead process forwards via transition rule (=TPM)
 for (i in 1:nind){
   for (t in (f[i]+1):nyears){
     departure.state = z[i,t-1]
@@ -151,7 +154,7 @@ for (i in 1:nind){
 } #i
 
 
-# Observation process: simulate observations using observation matrix OPM (=THETA)
+# Observation process: simulate observations using observation matrix OPM 
 y = array(16, dim=c(nind, nyears))
 for (i in 1:nind){
   y[i,f[i]] = z[i,f[i]]
