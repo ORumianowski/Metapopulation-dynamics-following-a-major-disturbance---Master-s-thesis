@@ -14,7 +14,133 @@ marr <- marray(cormorant$ms.ch, unobs=3)
 mydata <- list(marr=marr, rel=rowSums(marr),
                zero=matrix(0, ncol=9, nrow=9), ones=diag(9))
 
-myconsts <- list(n.years=ncol(cormorant$ms.ch), n.colony = 5, ns=15)
+ns=15
+n.years=ncol(cormorant$ms.ch)
+
+
+U0 = matrix(NA, nrow = (n.years-2), ncol = 4)
+for (t in 1:(n.years-2)){
+  
+  U0[t,1] = (t-1)*ns+1
+  U0[t,2] = (t-1)*ns+ns
+  U0[t,3] = (t-1)*ns+1
+  U0[t,4] = (t-1)*ns+ns
+}
+
+U1 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
+U2 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
+
+
+for (t in 1:(n.years-2)){
+  U1[t,1] = (t-1)*ns+1
+  U1[t,2] = (t-1)*ns+ns
+  U2[t,1] = (t-1)*ns+1
+  U2[t,2] = (t-1)*ns+ns
+  k = 0
+  for (j in (t+1):(n.years-1)){
+    U1[t,(3+k)] = (j-1)*ns+1
+    U1[t,(4+k)] = (j-1)*ns+ns
+    U2[t,(3+k)] = (j-2)*ns+1
+    U2[t,(4+k)] = (j-2)*ns+ns
+    k = k + 2
+  }
+}
+
+
+
+U3 = matrix(NA, nrow = 1 , ncol = 4)
+
+U3[1] = (n.years-2)*ns+1 
+U3[2] = (n.years-2)*ns+ns
+U3[3] = (n.years-2)*ns+1
+U3[4] = (n.years-2)*ns+ns
+
+
+pr4 = matrix(NA, nrow = (n.years-2), ncol = 4)
+U5 = matrix(NA, nrow = (n.years-2), ncol = 4)
+pr6 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
+U7 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
+
+
+for (t in 1:(n.years-2)){
+
+  pr4[t,1] = (t-1)*ns+1
+  pr4[t,2] = (t-1)*ns+ns
+  pr4[t,3] = (t-1)*ns+1
+  pr4[t,4] = (t-1)*ns+ns
+  
+  U5[t,1] = (t-1)*ns+1
+  U5[t,2] = (t-1)*ns+ns
+  U5[t,3] = (t-1)*ns+1
+  U5[t,4] = (t-1)*ns+ns
+  
+  pr6[t,1] = (t-1)*ns+1
+  pr6[t,2] = (t-1)*ns+ns
+  
+  U7[t,1] = (t-1)*ns+1
+  U7[t,2] = (t-1)*ns+ns
+  
+  k = 0
+  
+  for (j in (t+1):(n.years-1)){
+    
+    pr6[t,3+k] = (j-1)*ns+1
+    pr6[t,4+k] = (j-1)*ns+ns
+    
+    U7[t,3+k] = (j-1)*ns+1
+    U7[t,4+k] = (j-1)*ns+ns
+    
+    k = k + 2
+  }
+}
+
+
+pr8 = matrix(NA, nrow = 1, ncol = 4)
+
+pr8[1] = (n.years-2)*ns+1
+pr8[2] = (n.years-2)*ns+ns
+pr8[3] = (n.years-2)*ns+1
+pr8[4] = (n.years-2)*ns+ns
+
+pr9 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
+
+for (t in 2:(n.years-1)){
+  k = 0
+  for (j in 1:(t-1)){
+    
+  pr9[t-1,1] = (t-1)*ns+1
+  pr9[t-1,2] = (t-1)*ns+ns
+  pr9[t-1,3+k] = (j-1)*ns+1
+  pr9[t-1,4+k] = (j-1)*ns+ns
+  k = k + 2
+    
+  }
+}
+
+
+pr10 = (n.years*ns-(ns-1))
+
+pr11 = matrix(NA, nrow = 1, ncol = 3)
+
+pr11[1] = NA
+pr11[2] = 1
+pr11[3] = ((n.years-1)*ns)
+
+
+myconsts <- list(n.years=ncol(cormorant$ms.ch), n.colony = 5, ns=15,
+                 
+                 U1 = U1,
+                 U2 =  U2,
+                 U3 = U3,
+                 pr4 = pr4,
+                 U5 = U5,
+                 pr6 = pr6,
+                 U7 = U7,
+                 pr8 = pr8,
+                 pr9 = pr9,
+                 pr10 = pr10,
+                 pr11 = pr11)
+
 
 mycode = nimbleCode(code ={
   
@@ -351,39 +477,41 @@ mycode = nimbleCode(code ={
   
   
   # Define the cell probabilities of the multistate m-array - page 185
-
   for (t in 1:(n.years-2)){
-    x_U <- (t-1)*ns+(1:ns)
-    y_U <- (t-1)*ns+(1:ns)
-    U[x_U,y_U] <- ones
+    
+    U[U0,U0] <- ones
     for (j in (t+1):(n.years-1)){
-      x_U1 = 
-      x_U1 = 
-      y_U2 = 
-      y_U2 = 
-      U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-2)*ns+(1:ns)] %*% 
+
+      U[xU1, yU1] <- U[xU2,yU2] %*% 
         psi %*% dq[1:ns,t,1:ns]
     } #j
   } #t
-  U[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- ones
+  
+  
+  U[xU3,yU3] <- ones
   # Diagonal
   for (t in 1:(n.years-2)){
-    pr[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] %*% psi %*% dp[1:ns,t,1:ns]
+    
+    pr[xpr4,ypr4] <- U[xU5,yU5] %*% psi %*% dp[1:ns,t,1:ns]
     # Above main diagonal
     for (j in (t+1):(n.years-1)){
-      pr[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] %*% psi %*% dp[1:ns,j,1:ns]
+      
+      pr[xpr6,ypr6] <- U[xU7,yU7] %*% psi %*% dp[1:ns,j,1:ns]
     } #j
   } #t
-  pr[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- psi %*% dp[1:ns,n.years-1,1:ns] 
+
+  pr[xpr8,ypr8] <- psi %*% dp[1:ns,n.years-1,1:ns] 
   # Below main diagonal
   for (t in 2:(n.years-1)){
     for (j in 1:(t-1)){
-      pr[(t-1)*ns+(1:ns),(j-1)*ns+(1:ns)] <- zero
+      
+      pr[xpr9,ypr9] <- zero
     } #j
   } #t
   # Last column: probability of non-recapture
   for (t in 1:((n.years-1)*ns)){
-    pr[t,(n.years*ns-(ns-1))] <- 1-sum(pr[t,1:((n.years-1)*ns)])
+    
+    pr[t,ypr10] <- 1-sum(pr[t,ypr11])
   } #t
   
 })

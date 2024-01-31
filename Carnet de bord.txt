@@ -229,3 +229,9 @@ Objectifs:
 - script cmr part
 - rajout de l'ffet "extinction de colonie"
 
+## 31/01/2024 - mercredi
+
+- comprendre le dynamic indexing in nimble
+
+
+

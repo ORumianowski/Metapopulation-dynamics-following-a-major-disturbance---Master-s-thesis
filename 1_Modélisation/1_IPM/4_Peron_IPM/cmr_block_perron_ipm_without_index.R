@@ -353,14 +353,8 @@ mycode = nimbleCode(code ={
   # Define the cell probabilities of the multistate m-array - page 185
 
   for (t in 1:(n.years-2)){
-    x_U <- (t-1)*ns+(1:ns)
-    y_U <- (t-1)*ns+(1:ns)
-    U[x_U,y_U] <- ones
+    U[(t-1)*ns+(1:ns), (t-1)*ns+(1:ns)] <- ones
     for (j in (t+1):(n.years-1)){
-      x_U1 = 
-      x_U1 = 
-      y_U2 = 
-      y_U2 = 
       U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-2)*ns+(1:ns)] %*% 
         psi %*% dq[1:ns,t,1:ns]
     } #j
