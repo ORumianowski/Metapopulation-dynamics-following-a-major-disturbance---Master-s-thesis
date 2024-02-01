@@ -164,3 +164,6 @@ for (i in 1:nind){
     y[i,t] = observed.state
   } #t
 } #i
+
+y[y==16] <- 0
+#marr <- marray(y, unobs=5)

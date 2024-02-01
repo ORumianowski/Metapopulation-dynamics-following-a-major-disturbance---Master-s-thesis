@@ -1,40 +1,6 @@
 
+model {
 
-
-library(IPMbook); library(nimble)
-data(cormorant)
-str(cormorant)
-
-# CMR du modèle
-# Bundle data and produce data overview
-
-# Transform to m-array
-marr <- marray(cormorant$ms.ch, unobs=3)
-
-mydata <- list(marr=marr, rel=rowSums(marr),
-               zero=matrix(0, ncol=9, nrow=9), ones=diag(9))
-
-myconsts <- list(n.years=ncol(cormorant$ms.ch), n.colony = 5, ns=15)
-
-mycode = nimbleCode(code ={
-  
-  # -------------------------------------------------
-  # Stages:
-  # N: not-yet recruited individuals
-  # B: breeders
-  # Parameters:
-  # phi[age, site, time]: survival probability
-  # eta[departure site, arrival site, time]: natal dispersal
-  # nu[departure site, arrival site, time]: breeding dispersal
-  # kappa[site, time]: recruitment probability
-  # rho[site, time]: productivity
-  # p[site, time]: recapture probability
-  # -------------------------------------------------
-  # Priors 
-  
-  #rho[1] ~ dunif(0, 4) # productivité de la Ronze
-  #rho[2] ~ dunif(0, 4) # productivité des autres colonies
-  
   phi[1] ~ dunif(0, 1) # survie la première année
   phi[2] ~ dunif(0, 1) # Survie des subadultes et adultes
   
@@ -47,7 +13,7 @@ mycode = nimbleCode(code ={
       nu[dep, arr] ~ dunif(0, 1) # breeding dispersal
     }
   }
-
+  
   for (t in 1:(n.years-1)){
     for (s in 1:n.colony){
       p[s,t] ~ dunif(0, 1)
@@ -56,7 +22,7 @@ mycode = nimbleCode(code ={
   
   # Define the multinomial likelihood
   for (t in 1:((n.years-1)*ns)){
-    marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,(n.years*ns-(ns-1))], rel[t])
+    marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,1:(n.years*ns-(ns-1))], rel[t])
   }
   
   
@@ -312,120 +278,78 @@ mycode = nimbleCode(code ={
   #  Define re-encounter probabilities
   
   for (t in 1:(n.years-1)){
-  
-  po[1,t] <- 0
-  po[2,t] <- 0
-  po[3,t] <- 0
-  po[4,t] <- 0
-  po[5,t] <- 0
-  po[6,t] <- p[1,t]
-  po[7,t] <- p[2,t]
-  po[8,t] <- p[3,t]
-  po[9,t] <- p[4,t]
-  po[10,t] <- p[5,t]
-  po[11,t] <- 0
-  po[12,t] <- 0
-  po[13,t] <- 0
-  po[14,t] <- 0
-  po[15,t] <- 0
-  
-  # Calculate probability of non-encounter (dq) and reshape the array for the encounter
-  # probabilities
-  for (s in 1:ns){
-    dp[s,t,s] <- po[s,t]
-    dq[s,t,s] <- 1-po[s,t]
-  } #s
-  for (s in 1:(ns-1)){
-    for (m in (s+1):ns){
-      dp[s,t,m] <- 0
-      dq[s,t,m] <- 0
-    } #m
-  } #s
-  for (s in 2:ns){
-    for (m in 1:(s-1)){
-      dp[s,t,m] <- 0
-      dq[s,t,m] <- 0
-    } #m
-  } #s
+    
+    po[1,t] <- 0
+    po[2,t] <- 0
+    po[3,t] <- 0
+    po[4,t] <- 0
+    po[5,t] <- 0
+    po[6,t] <- p[1,t]
+    po[7,t] <- p[2,t]
+    po[8,t] <- p[3,t]
+    po[9,t] <- p[4,t]
+    po[10,t] <- p[5,t]
+    po[11,t] <- 0
+    po[12,t] <- 0
+    po[13,t] <- 0
+    po[14,t] <- 0
+    po[15,t] <- 0
+    
+    # Calculate probability of non-encounter (dq) and reshape the array for the encounter
+    # probabilities
+    for (s in 1:ns){
+      dp[s,t,s] <- po[s,t]
+      dq[s,t,s] <- 1-po[s,t]
+    } #s
+    for (s in 1:(ns-1)){
+      for (m in (s+1):ns){
+        dp[s,t,m] <- 0
+        dq[s,t,m] <- 0
+      } #m
+    } #s
+    for (s in 2:ns){
+      for (m in 1:(s-1)){
+        dp[s,t,m] <- 0
+        dq[s,t,m] <- 0
+      } #m
+    } #s
   } #t
   
+  # Define the cell probabilities of the multistate m-array
   
-  # Define the cell probabilities of the multistate m-array - page 185
-
   for (t in 1:(n.years-2)){
     U[(t-1)*ns+(1:ns), (t-1)*ns+(1:ns)] <- ones
-    for (j in (t+1):(n.years-1)){
-      U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-2)*ns+(1:ns)] %*% 
-        psi %*% dq[1:ns,t,1:ns]
-    } #j
+    
+  for (j in (t+1):(n.years-1)){
+    U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-2)*ns+(1:ns)] %*% psi[,] %*% dq[,t,]
+   } #j
   } #t
+  
   U[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- ones
+  
+  
   # Diagonal
   for (t in 1:(n.years-2)){
-    pr[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] %*% psi %*% dp[1:ns,t,1:ns]
-    # Above main diagonal
-    for (j in (t+1):(n.years-1)){
-      pr[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] %*% psi %*% dp[1:ns,j,1:ns]
+    pr[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns),(t-1)*ns+(1:ns)] %*% psi[,] %*% dp[,t,]
+    
+  # Above main diagonal
+  for (j in (t+1):(n.years-1)){
+    pr[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] <- U[(t-1)*ns+(1:ns), (j-1)*ns+(1:ns)] %*% psi[,] %*% dp[,j,]
     } #j
   } #t
-  pr[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- psi %*% dp[1:ns,n.years-1,1:ns] 
+  
+  pr[(n.years-2)*ns+(1:ns), (n.years-2)*ns+(1:ns)] <- psi[,] %*% dp[,n.years-1,]
+  
   # Below main diagonal
   for (t in 2:(n.years-1)){
     for (j in 1:(t-1)){
       pr[(t-1)*ns+(1:ns),(j-1)*ns+(1:ns)] <- zero
     } #j
   } #t
+  
   # Last column: probability of non-recapture
   for (t in 1:((n.years-1)*ns)){
     pr[t,(n.years*ns-(ns-1))] <- 1-sum(pr[t,1:((n.years-1)*ns)])
   } #t
   
-})
-
-# Initial values
-inits <- function(cc=cormorant$count){
-  B <- array(NA, dim=c(3, 14))
-  B[1,1] <- rpois(1, cc[1,1])
-  B[2,1] <- rpois(1, cc[2,1])
-  B[3,1] <- rpois(1, cc[3,1])
-  N <- B * 0.55/0.45
-  return(list(B=B, N=N))
 }
-
-
-# Parameters monitored
-parameters <- c("phi", "kappa", "eta", "nu", "sigma", # "rho",
-                "N", "B")
-# MCMC settings
-ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000
-
-
-nimble_model <- nimbleModel(code = mycode, name = "IPM", constants = myconsts,
-                            data = mydata, inits = inits())
-
-Cnimble_model<- compileNimble(nimble_model)
-
-Cnimble_modelConf <- configureMCMC(Cnimble_model, enableWAIC = FALSE, print = FALSE)
-
-MCMC <- buildMCMC(Cnimble_modelConf)
-CMCMC <- compileNimble(MCMC)
-
-mcmc.out <- runMCMC(CMCMC,
-                    niter = ni, nchains = nc,
-                    nburnin = nb, thin = nt,
-                    inits = inits, setSeed = TRUE,
-                    samples = TRUE, summary = TRUE)
-
-MCMCvis::MCMCtrace(object = mcmc.out[["samples"]],
-                   pdf = FALSE, 
-                   ind = TRUE)
-
-MCMCvis::MCMCsummary(mcmc.out[["samples"]])
-
-
-
-
-
-
-
-

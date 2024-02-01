@@ -2,143 +2,23 @@
 
 
 library(IPMbook); library(nimble)
-data(cormorant)
-str(cormorant)
 
-# CMR survey du modèle
+# CMR du modèle
 # Bundle data and produce data overview
 
 # Transform to m-array
-marr <- marray(cormorant$ms.ch, unobs=3)
+marr <- marray(y, unobs=5)
+
+n.colony = 5
+n.age.class = 3
+n.years = 30
+ns=n.colony*n.age.class
 
 mydata <- list(marr=marr, rel=rowSums(marr),
-               zero=matrix(0, ncol=15, nrow=15), ones=diag(15))
+               zero=matrix(0, ncol=ns, nrow=ns), ones=diag(ns))
 
-ns=15
-n.years=ncol(cormorant$ms.ch)
-
-U0 = matrix(NA, nrow = (n.years-2), ncol = 4)
-for (t in 1:(n.years-2)){
-  
-  U0[t,1] = (t-1)*ns+1
-  U0[t,2] = (t-1)*ns+ns
-  U0[t,3] = (t-1)*ns+1
-  U0[t,4] = (t-1)*ns+ns
-}
-
-U1 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
-U2 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
-
-
-for (t in 1:(n.years-2)){
-  U1[t,1] = (t-1)*ns+1
-  U1[t,2] = (t-1)*ns+ns
-  U2[t,1] = (t-1)*ns+1
-  U2[t,2] = (t-1)*ns+ns
-  k = 0
-  for (j in (t+1):(n.years-1)){
-    U1[t,(3+k)] = (j-1)*ns+1
-    U1[t,(4+k)] = (j-1)*ns+ns
-    U2[t,(3+k)] = (j-2)*ns+1
-    U2[t,(4+k)] = (j-2)*ns+ns
-    k = k + 2
-  }
-}
-
-
-
-U3 = matrix(NA, nrow = 1 , ncol = 4)
-
-U3[1] = (n.years-2)*ns+1 
-U3[2] = (n.years-2)*ns+ns
-U3[3] = (n.years-2)*ns+1
-U3[4] = (n.years-2)*ns+ns
-
-
-pr4 = matrix(NA, nrow = (n.years-2), ncol = 4)
-U5 = matrix(NA, nrow = (n.years-2), ncol = 4)
-pr6 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
-U7 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
-
-
-for (t in 1:(n.years-2)){
-
-  pr4[t,1] = (t-1)*ns+1
-  pr4[t,2] = (t-1)*ns+ns
-  pr4[t,3] = (t-1)*ns+1
-  pr4[t,4] = (t-1)*ns+ns
-  
-  U5[t,1] = (t-1)*ns+1
-  U5[t,2] = (t-1)*ns+ns
-  U5[t,3] = (t-1)*ns+1
-  U5[t,4] = (t-1)*ns+ns
-  
-  pr6[t,1] = (t-1)*ns+1
-  pr6[t,2] = (t-1)*ns+ns
-  
-  U7[t,1] = (t-1)*ns+1
-  U7[t,2] = (t-1)*ns+ns
-  
-  k = 0
-  
-  for (j in (t+1):(n.years-1)){
-    
-    pr6[t,3+k] = (j-1)*ns+1
-    pr6[t,4+k] = (j-1)*ns+ns
-    
-    U7[t,3+k] = (j-1)*ns+1
-    U7[t,4+k] = (j-1)*ns+ns
-    
-    k = k + 2
-  }
-}
-
-
-pr8 = matrix(NA, nrow = 1, ncol = 4)
-
-pr8[1] = (n.years-2)*ns+1
-pr8[2] = (n.years-2)*ns+ns
-pr8[3] = (n.years-2)*ns+1
-pr8[4] = (n.years-2)*ns+ns
-
-pr9 = matrix(NA, nrow = (n.years-2), ncol = 2*(n.years-1))
-
-for (t in 2:(n.years-1)){
-  k = 0
-  for (j in 1:(t-1)){
-    
-  pr9[t-1,1] = (t-1)*ns+1
-  pr9[t-1,2] = (t-1)*ns+ns
-  pr9[t-1,3+k] = (j-1)*ns+1
-  pr9[t-1,4+k] = (j-1)*ns+ns
-  k = k + 2
-    
-  }
-}
-
-
-pr10 = (n.years*ns-(ns-1))
-
-pr11 = matrix(NA, nrow = 1, ncol = 1)
-
-pr11[1] = 1
-pr11[2] = ((n.years-1)*ns)
-
-
-myconsts <- list(n.years=ncol(cormorant$ms.ch), n.colony = 5, ns=15,
-                 
-                 U1 = U1,
-                 U2 =  U2,
-                 U3 = U3,
-                 pr4 = pr4,
-                 U5 = U5,
-                 pr6 = pr6,
-                 U7 = U7,
-                 pr8 = pr8,
-                 pr9 = pr9,
-                 pr10 = pr10,
-                 pr11 = pr11)
-
+myconsts <- list(n.years=n.years, n.colony = n.colony, ns=ns,
+                 cst_pr = ((n.years-1)*ns))
 
 mycode = nimbleCode(code ={
   
@@ -180,7 +60,7 @@ mycode = nimbleCode(code ={
   
   # Define the multinomial likelihood
   for (t in 1:((n.years-1)*ns)){
-    marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,(n.years*ns-(ns-1))], rel[t])
+    marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,1:(n.years*ns-(ns-1))], rel[t])
   }
   
   
@@ -475,75 +355,181 @@ mycode = nimbleCode(code ={
   
   
   # Define the cell probabilities of the multistate m-array - page 185
+
   for (t in 1:(n.years-2)){
-    
-    U[U0[t,1]:U0[t,2],U0[t,3]:U0[t,4]] <- ones
-    
+    for (s1 in 1:ns){
+      for (s2 in 1:ns){
+        U[(t-1)*ns+(s1), (t-1)*ns+(s2)] <- ones[s1,s2]
+      }
+    }
     for (j in (t+1):(n.years-1)){
-      for (z1 in seq(3, by = 2, length.out = (n.years-2))){
-        for (z2 in seq(4, by = 2, length.out = (n.years-2))){
       
-          U[U1[t,1]:U1[t,2],U1[t,z1]:U1[t,z2]] <- U[U2[t,1]:U2[t,2],U2[t,z1]:U2[t,z2]] %*% psi %*% dq[1:ns,t,1:ns]
       
+      C <- matrix(0, nrow = ns, ncol = ns)
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+          for (k in 1:ns){
+            C[s1, s2] <- C[s1, s2] + U[(t-1)*ns+(s1), (j-2)*ns+(k)] * psi[k,s2]
+          }
+        }
+      }
+      
+      D <- matrix(0, nrow = ns, ncol = ns)
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+          for (k in 1:ns){
+            D[s1, s2] <- D[s1, s2] + C[s1, s2] * dq[k,t,s2]
+          }
+        }
+      }
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+           U[(t-1)*ns+(s1), (j-1)*ns+(s2)] <- D[s1,s2]
         }
       }
     } #j
   } #t
   
   
-  U[U3[1,1]:U3[1,2],U3[1,3]:U3[1,4]] <- ones
+  for (s1 in 1:ns){
+    for (s2 in 1:ns){  
+      U[(n.years-2)*ns+(s1), (n.years-2)*ns+(s2)] <- ones[s1,s2]
+    }
+  }
+  
+  
   # Diagonal
   for (t in 1:(n.years-2)){
     
-    pr[pr4[t,1]:pr4[t,2],pr4[t,3]:pr4[t,4]] <- U[U5[t,1]:U5[t,2],U5[t,3]:U5[t,4]] %*% psi %*% dp[1:ns,t,1:ns]
+    C <- matrix(0, nrow = ns, ncol = ns)
+    
+    for (s1 in 1:ns){
+      for (s2 in 1:ns){
+        for (k in 1:ns){
+          C[s1, s2] <- C[s1, s2] + U[(t-1)*ns+(s1),(t-1)*ns+(k)] %*% psi[k,s2]
+        }
+      }
+    }
+    
+    D <- matrix(0, nrow = ns, ncol = ns)
+    for (s1 in 1:ns){
+      for (s2 in 1:ns){
+        for (k in 1:ns){
+          D[s1, s2] <- D[s1, s2] + C[s1, s2] * dp[s1,t,s2]
+        }
+      }
+    }
+    
+    for (s1 in 1:ns){
+      for (s2 in 1:ns){  
+         pr[(t-1)*ns+(s1),(t-1)*ns+(s2)] <-  D[s1,s2]
+      }
+    }
+    
     # Above main diagonal
     for (j in (t+1):(n.years-1)){
-      for (z1 in seq(3, by = 2, length.out = (n.years-2))){
-        for (z2 in seq(4, by = 2, length.out = (n.years-2))){
       
-      pr[pr6[t,1]:pr6[t,2],pr6[t,z1]:pr6[t,z2]] <- U[U7[t,1]:U7[t,2],U7[t,z1]:U7[t,z2]] %*% psi %*% dp[1:ns,j,1:ns]
+      C <- matrix(0, nrow = ns, ncol = ns)
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+          for (k in 1:ns){
+            C[s1, s2] <- C[s1, s2] + U[(t-1)*ns+(s1), (j-1)*ns+(k)] %*% psi[k,s2]
+          }
+        }
+      }
+      
+      D <- matrix(0, nrow = ns, ncol = ns)
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+          for (k in 1:ns){
+            D[s1, s2] <- D[s1, s2] + C[s1, s2] * dp[s1,j,s2]
+          }
+        }
+      }
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+          pr[(t-1)*ns+(s1), (j-1)*ns+(s2)] <- D[s1, s2] 
+        }
+      } 
+    } #j
+  } #t
+  
+
+      
+      C <- matrix(0, nrow = ns, ncol = ns)
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+          for (k in 1:ns){
+            C[s1, s2] <- C[s1, s2] + psi[s1,k] %*% dp[k,n.years-1,s2] 
+          }
+        }
+      }
+      
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+            pr[(n.years-2)*ns+(s1), (n.years-2)*ns+(s2)] <-  C[s1, s2]
+          }
+        }
+  
+  # Below main diagonal
+  for (t in 2:(n.years-1)){
+    for (j in 1:(t-1)){
+      for (s1 in 1:ns){
+        for (s2 in 1:ns){
+           pr[(t-1)*ns+(s1),(j-1)*ns+(s2)] <- zero[s1,s2]
         }
       }
     } #j
   } #t
-
-  pr[pr8[1,1]:pr8[1,2],pr8[1,3]:pr8[1,4]] <- psi %*% dp[1:ns,n.years-1,1:ns] 
-  
-  # Below main diagonal
-  for (t in 1:(n.years-2)){
-    for (z1 in seq(3, by = 2, length.out = (n.years-2))){
-      for (z2 in seq(4, by = 2, length.out = (n.years-2))){
-    
-        pr[pr9[t,1]:pr9[t,2],pr9[t,z1]:pr9[t,z2]] <- zero
-    
-      }
-    } #j
-  } #t
-  
   # Last column: probability of non-recapture
   for (t in 1:((n.years-1)*ns)){
-    
-    pr[t,pr10] <- 1-sum(pr[t,pr11[1]:pr11[2]])
+    pr[t,(n.years*ns-(ns-1))] <- 1-sum(pr[t,1:cst_pr])
   } #t
   
 })
 
+
 # Initial values
-inits <- function(cc=cormorant$count){
-  B <- array(NA, dim=c(3, 14))
-  B[1,1] <- rpois(1, cc[1,1])
-  B[2,1] <- rpois(1, cc[2,1])
-  B[3,1] <- rpois(1, cc[3,1])
-  N <- B * 0.55/0.45
-  return(list(B=B, N=N))
+#inits <- function(){
+#  B <- array(NA, dim=c(n.colony, n.years))
+#  B[1,1] <- rpois(1, 3100)
+#  B[2,1] <- rpois(1, 200)
+#  B[3,1] <- rpois(1, 200)
+#  B[4,1] <- rpois(1, 200)
+#  B[5,1] <- rpois(1, 200)
+#  N <- B * 0.55/0.45
+#  return(list(B=B, N=N))
+#}
+
+inits <- function(){
+  
+  phi=c(0.2,0.8)
+  kappa=runif(2, 0.6, 0.9)
+  eta=eta
+  nu=nu
+  p=p
+  
+  return(list(phi=phi, kappa=kappa, nu=nu, eta=eta))
 }
+
+
 
 
 # Parameters monitored
 parameters <- c("phi", "kappa", "eta", "nu", "sigma", # "rho",
                 "N", "B")
 # MCMC settings
-ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000
+ni <- 1500 # 150000
+nb <- 500 # 50000
+nc <- 3
+nt <- 1 # 100
+
 
 
 nimble_model <- nimbleModel(code = mycode, name = "IPM", constants = myconsts,
