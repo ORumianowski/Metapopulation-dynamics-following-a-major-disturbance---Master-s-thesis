@@ -389,7 +389,7 @@ parameters <- c("phi", "kappa", "eta", "nu"#, "sigma",  "rho",
                ) # "N", "B")
 # MCMC settings
 #ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000
-ni <- 100; nb <- 10; nc <- 2; nt <- 1; na <- 10
+ni <- 1000; nb <- 200; nc <- 2; nt <- 1; na <- 200
 
 # Call JAGS from R (ART 143 min) and check convergence
 out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
