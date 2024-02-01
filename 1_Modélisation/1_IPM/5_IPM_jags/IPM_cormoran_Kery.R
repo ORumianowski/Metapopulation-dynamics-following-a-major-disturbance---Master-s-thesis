@@ -314,7 +314,8 @@ inits <- function(cc=cormorant$count){
 parameters <- c("beta.phi", "phi", "mu.kappa", "kappa", "p", "mean.eta", "mean.nu", "mean.rho", "sigma",
                 "N", "B")
 # MCMC settings
-ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000
+ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000 # 143min
+# ni <- 1500; nb <- 100; nc <- 3; nt <- 100; na <- 3000 # 6min
 
 # Call JAGS from R (ART 143 min) and check convergence
 out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,

@@ -1,6 +1,6 @@
 
-
-# Simplifier les priors
+# cmr only - in progress
+# Simplifier les priors 
 # 3 colonies simuler
 # 5 colonies
 # contraintes de Péron
@@ -10,10 +10,13 @@ library(IPMbook); library(jagsUI)
 data(cormorant)
 str(cormorant)
 
+
+
+cormorant$ms.ch = cormorant$ms.ch[sample(1:12600, size = 1000),]
 marr <- marray(cormorant$ms.ch, unobs=3)
 
 jags.data <- list(marr=marr, n.years=ncol(cormorant$ms.ch), rel=rowSums(marr), ns=9,
-                  zero=matrix(0, ncol=9, nrow=9), ones=diag(9), C=cormorant$count) 
+                  zero=matrix(0, ncol=9, nrow=9), ones=diag(9)) 
 str(jags.data)
 
 # Write JAGS model file
@@ -149,12 +152,7 @@ B[2,t+1] <- B[1,t] * phi[2,1,t] * nu[1,2,t] + B[2,t] * phi[2,2,t] * nu[2,2,t] + 
 B[3,t+1] <- B[1,t] * phi[2,1,t] * nu[1,3,t] + B[2,t] * phi[2,2,t] * nu[2,3,t] + B[3,t] * 
  phi[2,3,t] * nu[3,3,t] + N[3,t] * phi[2,3,t] * kappa[3,t] 
 }
-# Observation model
-for (t in 1:n.years){
-for (s in 1:3){
-C[s,t] ~ dnorm(B[s,t], tau[s])
-} #s
-} #t
+
 
 # Multistate capture-recapture data (with multinomial likelihood)
 # Define state-transition and re-encounter probabilities

@@ -1,13 +1,69 @@
 
-library(IPMbook); library(jagsUI)
-data(cormorant)
-str(cormorant)
+library(IPMbook)
+library(jagsUI)
+library(dplyr)
 
-marr <- marray(cormorant$ms.ch, unobs=3)
 
-jags.data <- list(marr=marr, n.years=ncol(cormorant$ms.ch), rel=rowSums(marr), ns=9,
-                  zero=matrix(0, ncol=9, nrow=9), ones=diag(9), C=cormorant$count) 
-str(jags.data)
+eff=matrix( c(
+  2500,900, 01, 466, 3376,
+  2500,1000, 01, 480, 2823,
+  2500,1200, 01, 434, 2820,
+  2500,1000, 01, 685, 2518,
+  2500,01, 01, 410, 1552,
+  2500,500, 245, 610, 2077,
+  2500,01, 01, 413, 2099,
+  3000,700, 01, 84, 2077,
+  3000,700, 01, 01, 1275,
+  3000,500, 01, 469, 1499,
+  3000,280, 210, 560, 1000,
+  5000,560, 119, 179, 859,
+  5000,272, 196, 672, 894,
+  5000,295, 150, 530, 1133,
+  5000,280, 42, 406, 1087,
+  5000,525, 01, 283, 1512,
+  5000,01, 10, 213, 866,
+  5000,450, 01, 127, 1502,
+  5000,420, 01, 01, 1109,
+  5000,455, 01, 01, 1356), ncol= 5, byrow = T) %>% 
+  t()
+
+
+
+# Hypothèses pour l'initialisation ----------------------------------------
+
+
+phi <- c(0.213, 0.860)
+kappa <- 0.7
+rho <- 1
+A <- matrix(c(
+  phi[2] * (1-kappa), phi[1] * rho,
+  phi[2] * kappa, phi[2]), byrow=TRUE, ncol=2)
+z <- which.max(Re(eigen(A)$values))
+revec <- Re(eigen(A)$vectors[,z])
+matrix(revec / sum(revec)) # Standardized right eigenvector
+# 0.2 0.8
+
+pop_init = data.frame(estim = c(2500, 900, 1, 466, 3376)) %>% 
+  mutate(B_inf = estim*0.7)%>% 
+  mutate(B_sup = estim*1.3)%>% 
+  mutate(N_inf = estim*(0.2/0.8)*0.7)%>% 
+  mutate(N_sup = estim*(0.2/0.8)*1.3) %>% 
+  round() %>% 
+  as.matrix()
+
+
+n.colony = 5
+n.age.class = 3
+n.years = ncol(eff)
+ns=n.colony*n.age.class
+
+jags.data <- list(C=eff, 
+                  ns=ns, n.colony = n.colony,
+                  n.years = n.years,
+                  pop_init=pop_init) 
+
+
+
 
 # Write JAGS model file
 cat(file = "model1.txt", "
@@ -45,12 +101,10 @@ model {
   
   # Population count data (state-space model)
   # Models for the initial population size: uniform priors
-  N[1,1] ~ dunif(4270, 7940) # cormorant$count[1,1] * (0.55/0.45) +/- 30%
-  B[1,1] ~ dunif(3500, 6500) # cormorant$count[1,1] +/- 30%
-  N[2,1] ~ dunif(1710, 3180)
-  B[2,1] ~ dunif(1400, 2600)
-  N[3,1] ~ dunif(680, 1270)
-  B[3,1] ~ dunif(560, 1040)
+  for (col in 1:n.colony){
+    N[col,1] ~ dunif(pop_init[col,4], pop_init[col,5]) 
+    B[col,1] ~ dunif(pop_init[col,2], pop_init[col,3]) 
+  }
                  
   # Process model over time: our model of population dynamics
   for (t in 1:(n.years-1)){
