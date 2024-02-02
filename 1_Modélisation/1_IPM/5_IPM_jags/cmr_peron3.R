@@ -1,4 +1,39 @@
 
+# Only CMR component  -----------------------------------------------------
+
+library(IPMbook)
+library(jagsUI)
+library(tidyverse)
+
+source("simulation/simul_peron_simple.R")
+
+# Bundle data 
+marr <- marray(y, unobs=5)
+
+n.years = ncol(y)
+n.colony = 5
+n.age.class = 3
+ns=n.colony*n.age.class
+
+nest.states = (1:n.colony)+0*n.colony
+breed.states = (1:n.colony)+1*n.colony
+prebr.states = (1:n.colony)+2*n.colony
+state2col = rep(1:n.colony, time = n.age.class)
+
+jags.data <- list(marr = marr, rel=rowSums(marr),
+                  n.colony=n.colony,
+                  n.years=n.years,
+                  ns=ns,
+                  zero=matrix(0, ncol=ns, nrow=ns), ones=diag(ns),
+                  
+                  nest.states = nest.states,
+                  breed.states = breed.states,
+                  prebr.states = prebr.states,
+                  state2col = state2col) 
+
+
+# Write JAGS model file
+cat(file = "model1.txt", "
 model {
 
   # only for survey
@@ -19,7 +54,7 @@ model {
       eta_[dep, arr] <- mean.eta  # natal dispersal
       nu_[dep, arr] <- mean.nu # breeding dispersal
     }
-  }
+  
   
  # Pour maintenir la nature stochastique des dispersions : somme rows = 1
   for (dep in 1:n.colony){
@@ -216,3 +251,22 @@ model {
   }
   
 }
+")
+
+# Initial values
+inits <- function(){
+  return(list())
+}
+
+# Parameters monitored
+parameters <- c("phi", "kappa", "mean.eta", "mean.nu", "p")
+# MCMC settings
+#ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000 # 143min
+#ni <- 1500; nb <- 100; nc <- 3; nt <- 100; na <- 3000 # 6min
+ni <- 1000; nb <- 100; nc <- 2; nt <- 1; na <- 2500 # 15min
+
+# Call JAGS from R and check convergence
+out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
+             n.thin=nt, n.adapt=na, parallel=TRUE) 
+traceplot(out1)
+whiskerplot(out1,parameters=c('p'))

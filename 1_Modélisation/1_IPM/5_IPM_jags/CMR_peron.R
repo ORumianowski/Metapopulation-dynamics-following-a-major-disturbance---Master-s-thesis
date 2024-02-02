@@ -1,5 +1,4 @@
 
-
 # Only CMR component  -----------------------------------------------------
 
 library(IPMbook)
@@ -398,10 +397,10 @@ parameters <- c("phi", "kappa", "mean.eta", "mean.nu", "p")
 # MCMC settings
 #ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000 # 143min
 #ni <- 1500; nb <- 100; nc <- 3; nt <- 100; na <- 3000 # 6min
-ni <- 1000; nb <- 100; nc <- 2; nt <- 1; na <- 2500 # 6min
+ni <- 1000; nb <- 100; nc <- 2; nt <- 1; na <- 2500 # 15min
 
 # Call JAGS from R and check convergence
 out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
              n.thin=nt, n.adapt=na, parallel=TRUE) 
 traceplot(out1)
-whiskerplot(out1,parameters=c('phi'))
+whiskerplot(out1,parameters=c('p'))

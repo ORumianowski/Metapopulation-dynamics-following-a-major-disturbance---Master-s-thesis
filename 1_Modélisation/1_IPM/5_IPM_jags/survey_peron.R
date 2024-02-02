@@ -17,7 +17,7 @@ A <- matrix(c(
 z <- which.max(Re(eigen(A)$values))
 revec <- Re(eigen(A)$vectors[,z])
 matrix(revec / sum(revec)) 
-# 0.2 0.8 
+# roughly 0.2 0.8 
 
 # We determine the numbers of pre breeders and breeders for the priors, the first year
 pop_init = data.frame(estim = c(2500, 900, 1, 466, 3376)) %>% 
@@ -187,11 +187,34 @@ parameters <- c("phi", "kappa", "eta", "nu", "rho", "sigma",
                 "N", "B")
 # MCMC settings
 #ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000
-ni <- 1000; nb <- 100; nc <- 3; nt <- 10; na <- 300
+ni <- 10000; nb <- 100; nc <- 3; nt <- 3; na <- 3000
 
 # Call JAGS from R and check convergence
 out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
              n.thin=nt, n.adapt=na, parallel=TRUE) 
 #traceplot(out1)
 
+
+# Plot  -------------------------------------------------------------------
+
+library(ggplot2)
+
+df <- data.frame(
+  Temps = rep(seq_len(nrow(t(eff))), time = ncol(t(eff))),
+  Population = rep(c("pop1", "pop2", "pop3", "pop4", "pop5"), each = nrow(t(eff))),
+  Valeur = as.vector(t(eff))
+)
+
+ggplot(df, aes(x = Temps, y = Valeur, color = Population)) +
+  geom_line() +
+  labs(title = "Effectifs des 5 populations",
+       x = "Temps",
+       y = "Nombre d'individus") +
+  theme_minimal()
+
 whiskerplot(out1,parameters=c('B'))
+
+library(coda)
+
+
+plot_MCMC(out1)

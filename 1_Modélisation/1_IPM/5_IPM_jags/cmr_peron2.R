@@ -1,4 +1,29 @@
 
+# Only CMR component  -----------------------------------------------------
+
+library(IPMbook)
+library(jagsUI)
+library(tidyverse)
+
+source("simulation/simul_peron_simple.R")
+
+# Bundle data 
+marr <- marray(y, unobs=5)
+
+n.years = ncol(y)
+n.colony = 5
+n.age.class = 3
+ns=n.colony*n.age.class
+
+jags.data <- list(marr = marr, rel=rowSums(marr),
+                  n.colony=n.colony,
+                  n.years=n.years,
+                  ns=ns,
+                  zero=matrix(0, ncol=ns, nrow=ns), ones=diag(ns)) 
+
+
+# Write JAGS model file
+cat(file = "model1.txt", "
 model {
 
   # only for survey
@@ -35,31 +60,101 @@ model {
   # Define state-transition
   
   # Nestling
-  for (prev.state in nest.states){
-    # nestlings may become pre breeders
-    for (next_state in prebr.states){
-      psi[prev.state,next_state] <- phi[1] * eta[state2col[prev.state],state2col[next_state]]
-    }
+  for (previous_state in 1:n.colony){
     # nestlings do not become nestling or breeders
-    for (next_state in c(nest.states,breed.states)){
-      psi[prev.state,next_state] <- 0
+    for (next_state in 1:(2*n.colony)){
+      psi[previous_state,next_state] <- 0
+      
+    }
+    # nestlings may become pre breeders
+    for (next_state in (2*n.colony+1):(3*n.colony)){ 
+      psi[previous_state,next_state] <- phi[1] * eta[previous_state,next_state]
     }
   }
   
   # Breeders
-  for (prev.state in breed.states){
-    # Breeders may stay breeders
-    for (next_state in breed.states){
-      psi[prev.state,next_state] <- phi[2] * nu[state2col[prev.state],state2col[next_state]]
-    }
-    # Breeders cannot become nestling or prebreeders
-        for (next_state in c(nest.states, prebr.states)){
-      psi[prev.state,next_state] <- 0
-    }
-  }
+  #for (col in 1:n.colony){
+  psi[6,1] <- 0
+  psi[6,2] <- 0
+  psi[6,3] <- 0
+  psi[6,4] <- 0
+  psi[6,5] <- 0
+  psi[6,6] <- phi[2] * nu[1,1]
+  psi[6,7] <- phi[2] * nu[1,2]
+  psi[6,8] <- phi[2] * nu[1,3]
+  psi[6,9] <- phi[2] * nu[1,4]
+  psi[6,10] <- phi[2] * nu[1,5]
+  psi[6,11] <- 0
+  psi[6,12] <- 0
+  psi[6,13] <- 0
+  psi[6,14] <- 0
+  psi[6,15] <- 0
   
+  psi[7,1] <- 0
+  psi[7,2] <- 0
+  psi[7,3] <- 0
+  psi[7,4] <- 0
+  psi[7,5] <- 0
+  psi[7,6] <- phi[2] * nu[2,1]
+  psi[7,7] <- phi[2] * nu[2,2]
+  psi[7,8] <- phi[2] * nu[2,3]
+  psi[7,9] <- phi[2] * nu[2,4]
+  psi[7,10] <- phi[2] * nu[2,5]
+  psi[7,11] <- 0
+  psi[7,12] <- 0
+  psi[7,13] <- 0
+  psi[7,14] <- 0
+  psi[7,15] <- 0
   
-  # Pre-Breeders # la forme compact a un pbm abec le choix de kappa - a travailler
+  psi[8,1] <- 0
+  psi[8,2] <- 0
+  psi[8,3] <- 0
+  psi[8,4] <- 0
+  psi[8,5] <- 0
+  psi[8,6] <- phi[2] * nu[3,1]
+  psi[8,7] <- phi[2] * nu[3,2]
+  psi[8,8] <- phi[2] * nu[3,3]
+  psi[8,9] <- phi[2] * nu[3,4]
+  psi[8,10] <- phi[2] * nu[3,5]
+  psi[8,11] <- 0
+  psi[8,12] <- 0
+  psi[8,13] <- 0
+  psi[8,14] <- 0
+  psi[8,15] <- 0
+  
+  psi[9,1] <- 0
+  psi[9,2] <- 0
+  psi[9,3] <- 0
+  psi[9,4] <- 0
+  psi[9,5] <- 0
+  psi[9,6] <- phi[2] * nu[4,1]
+  psi[9,7] <- phi[2] * nu[4,2]
+  psi[9,8] <- phi[2] * nu[4,3]
+  psi[9,9] <- phi[2] * nu[4,4]
+  psi[9,10] <- phi[2] * nu[5,5]
+  psi[9,11] <- 0
+  psi[9,12] <- 0
+  psi[9,13] <- 0
+  psi[9,14] <- 0
+  psi[9,15] <- 0
+  
+  psi[10,1] <- 0
+  psi[10,2] <- 0
+  psi[10,3] <- 0
+  psi[10,4] <- 0
+  psi[10,5] <- 0
+  psi[10,6] <- phi[2] * nu[5,1]
+  psi[10,7] <- phi[2] * nu[5,2]
+  psi[10,8] <- phi[2] * nu[5,3]
+  psi[10,9] <- phi[2] * nu[5,4]
+  psi[10,10] <- phi[2] * nu[5,5]
+  psi[10,11] <- 0
+  psi[10,12] <- 0
+  psi[10,13] <- 0
+  psi[10,14] <- 0
+  psi[10,15] <- 0
+  
+  # Pre-Breeders
   
   psi[11,1] <- 0
   psi[11,2] <- 0
@@ -141,20 +236,25 @@ model {
   psi[15,14] <- 0
   psi[15,15] <- phi[2] * (1 - kappa[2])
   
-
-  
     #  Define re-encounter probabilities
   
   for (t in 1:(n.years-1)){
-    for(state in nest.states){
-      po[state,t] <- 0
-    }
-    for(state in breed.states){
-      po[state,t] <- p
-    }
-    for(state in prebr.states){
-      po[state,t] <- 0
-    }
+    
+    po[1,t] <- 0
+    po[2,t] <- 0
+    po[3,t] <- 0
+    po[4,t] <- 0
+    po[5,t] <- 0
+    po[6,t] <- p
+    po[7,t] <- p
+    po[8,t] <- p
+    po[9,t] <- p
+    po[10,t] <- p
+    po[11,t] <- 0
+    po[12,t] <- 0
+    po[13,t] <- 0
+    po[14,t] <- 0
+    po[15,t] <- 0
     
     # Calculate probability of non-encounter (dq) and reshape the array for the encounter
     # probabilities
@@ -216,3 +316,22 @@ model {
   }
   
 }
+")
+
+# Initial values
+inits <- function(){
+  return(list())
+}
+
+# Parameters monitored
+parameters <- c("phi", "kappa", "mean.eta", "mean.nu", "p")
+# MCMC settings
+#ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000 # 143min
+#ni <- 1500; nb <- 100; nc <- 3; nt <- 100; na <- 3000 # 6min
+ni <- 1000; nb <- 100; nc <- 2; nt <- 1; na <- 2500 # 6min
+
+# Call JAGS from R and check convergence
+out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
+             n.thin=nt, n.adapt=na, parallel=TRUE) 
+traceplot(out1)
+whiskerplot(out1,parameters=c('phi'))
