@@ -17,7 +17,7 @@ matrix_sto = function(M){
 # 7 : Breeders in colony 2
 # 8 : Breeders in colony 3
 # 9 : Breeders in colony 4
-# 10 : Pre-Breeders in colony 5
+# 10 : Breeders in colony 5
 # 11 : Pre-Breeders in colony 1
 # 12 : Pre-Breeders in colony 2
 # 13 : Pre-Breeders in colony 3
@@ -39,13 +39,13 @@ phiA = 0.844 # subadult and adult
 
 # Natal dispersion from one colony to another
 # - colony dependence
-eta = matrix_sto(matrix(runif(n = n.colony*n.colony , min = 0, max = 1), 
-             nrow = n.colony, ncol = n.colony))
+eta = matrix_sto(matrix(1/n.colony, 
+             nrow = n.colony, ncol = n.colony, byrow = T))
 
 # Breeding dispersion from one colony to another
 # - colony dependence
-nu = matrix_sto(matrix(runif(n = n.colony*n.colony , min = 0, max = 1), 
-              nrow = n.colony, ncol = n.colony)) 
+nu = matrix_sto(matrix(1/n.colony, 
+                       nrow = n.colony, ncol = n.colony, byrow = T))
 
 # Recruitment probability
 kappaLR = 0.619 # LaRonze
@@ -58,7 +58,7 @@ kappa = c(kappaLR, kappaSAT)
 
 # recapture probability
 #- time and colony dependence # colony dependence only for the moment
-p = matrix(runif(n = n.colony*n.colony , min = 0.2, max = 0.5),
+p = matrix(0.3,
              nrow = nyears, ncol = n.colony) 
 
 # Determine occasion when an individual first captured and marked

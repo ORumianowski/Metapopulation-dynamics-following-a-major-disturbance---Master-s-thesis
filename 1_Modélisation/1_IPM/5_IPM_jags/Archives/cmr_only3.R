@@ -1,7 +1,35 @@
 
+# cmr only - in progress
+
+
+library(IPMbook)
+library(jagsUI)
+library(tidyverse)
+
+source("simulation/simul_peron_simple.R")
+
+#marr1 <- marray(y, unobs=5)
+#marr = marr1[30:nrow(marr1),]
+
+marr <- marray(y, unobs=5)
+
+# Bundle data 
+n.years = ncol(y)
+n.colony = 5
+n.age.class = 3
+ns=n.colony*n.age.class
+
+jags.data <- list(marr = marr, rel=rowSums(marr),
+                  n.colony=n.colony,
+                  n.years=n.years,
+                  ns=ns,
+                  zero=matrix(0, ncol=ns, nrow=ns), ones=diag(ns)) 
+
+
+# Write JAGS model file
+cat(file = "model1.txt", "
 model {
 
-  # only for survey
   #rho[1] ~ dunif(0, 4) # productivité de la Ronze
   #rho[2] ~ dunif(0, 4) # productivité des autres colonies
   
@@ -16,16 +44,8 @@ model {
   
   for (dep in 1:n.colony){
     for (arr in 1:n.colony){
-      eta_[dep, arr] <- mean.eta  # natal dispersal
-      nu_[dep, arr] <- mean.nu # breeding dispersal
-    }
-  }
-  
- # Pour maintenir la nature stochastique des dispersions : somme rows = 1
-  for (dep in 1:n.colony){
-    for (arr in 1:n.colony){
-      eta[dep, arr] <- mean.eta / (eta_[dep, 1] + eta_[dep, 2] + eta_[dep, 3] + eta_[dep, 4] + eta_[dep, 5])
-      nu[dep, arr] <- mean.nu / (nu_[dep, 1] + nu_[dep, 2] + nu_[dep, 3] + nu_[dep, 4] + nu_[dep, 5])
+      eta[dep, arr] <- mean.eta  # natal dispersal
+      nu[dep, arr] <- mean.nu # breeding dispersal
     }
   }
   
@@ -355,8 +375,39 @@ model {
     
   # Define the multinomial likelihood
   #for (t in 1:((n.years-1)*ns)){
-  for (t in 1:((19)*ns)){
-     marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,], rel[t])
-  }
+    # marr[t,1:(n.years*ns-(ns-1))] ~ dmulti(pr[t,], rel[t])
+  #}
   
+  
+  marr[1,1:(n.years*ns-(ns-1))] ~ dmulti(pr[1,], rel[1])
+  marr[2,1:(n.years*ns-(ns-1))] ~ dmulti(pr[2,], rel[2])
+  marr[3,1:(n.years*ns-(ns-1))] ~ dmulti(pr[3,], rel[3])
+  marr[4,1:(n.years*ns-(ns-1))] ~ dmulti(pr[4,], rel[4])
+  marr[5,1:(n.years*ns-(ns-1))] ~ dmulti(pr[5,], rel[5])
+  
+  marr[6,1:(n.years*ns-(ns-1))] ~ dmulti(pr[6,], rel[6])
+  
+  marr[11,1:(n.years*ns-(ns-1))] ~ dmulti(pr[11,], rel[11])
+  marr[12,1:(n.years*ns-(ns-1))] ~ dmulti(pr[12,], rel[12])
+  marr[13,1:(n.years*ns-(ns-1))] ~ dmulti(pr[13,], rel[13])
+  marr[14,1:(n.years*ns-(ns-1))] ~ dmulti(pr[14,], rel[14])
+  marr[15,1:(n.years*ns-(ns-1))] ~ dmulti(pr[15,], rel[15])
 }
+")
+
+# Initial values
+inits <- function(){
+  return(list())
+}
+
+# Parameters monitored
+parameters <- c("phi", "kappa", "mean.eta", "mean.nu")
+# MCMC settings
+#ni <- 150000; nb <- 50000; nc <- 3; nt <- 100; na <- 3000 # 143min
+#ni <- 1500; nb <- 100; nc <- 3; nt <- 100; na <- 3000 # 6min
+ni <- 1000; nb <- 100; nc <- 2; nt <- 1; na <- 2500 # 6min
+
+# Call JAGS from R (ART 143 min) and check convergence
+out1 <- jags(jags.data, inits, parameters, "model1.txt", n.iter=ni, n.burnin=nb, n.chains=nc,
+             n.thin=nt, n.adapt=na, parallel=TRUE) 
+traceplot(out1)
